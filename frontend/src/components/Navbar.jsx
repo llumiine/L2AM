@@ -24,22 +24,23 @@ export default function Navbar() {
         {/* Navigation links */}
         <div className="navbar-links">
           <Link to="/" className="nav-link">Accueil</Link>
-          <Link to="/about" className="nav-link">À propos</Link>
           <Link to="/shop" className="nav-link">Boutique</Link>
+          <Link to="/about" className="nav-link">À propos</Link>
           <Link to="/contact" className="nav-link">Contact</Link>
+          <Link to="/register" className="nav-link">Inscription</Link>
         </div>
 
         {/* Actions (always visible) */}
         <div className="navbar-actions">
           <button className="navbar-btn" onClick={handleLogin}>Connexion</button>
           <input type="text" placeholder="Rechercher" className="navbar-input" />
-          <button className="navbar-cart">
+          <Link to="/panier" className="navbar-cart">
             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <circle cx="9" cy="21" r="1.5" />
               <circle cx="19" cy="21" r="1.5" />
               <path d="M2 2h2l3.6 9.59a2 2 0 0 0 2 1.41h7.72a2 2 0 0 0 2-1.41L22 6H6" />
             </svg>
-          </button>
+          </Link>
         </div>
 
         {/* Mobile menu button */}
@@ -57,9 +58,11 @@ export default function Navbar() {
         {/* Mobile menu */}
         <div className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>
           <Link to="/" className="nav-link">Accueil</Link>
-          <Link to="/about" className="nav-link">À propos</Link>
           <Link to="/shop" className="nav-link">Boutique</Link>
+          <Link to="/about" className="nav-link">À propos</Link>
           <Link to="/contact" className="nav-link">Contact</Link>
+          <Link to="/register" className="nav-link">Inscription</Link>
+          <Link to="/panier" className="nav-link">Panier</Link>
         </div>
       </div>
     </nav>

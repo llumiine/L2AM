@@ -1,5 +1,6 @@
 import "../styles/ProductGrid.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Link } from "react-router-dom";  // Ajoutez cet import en haut
 
 const products = [
   {
@@ -58,8 +59,13 @@ export default function ProductGrid() {
                 <h5 className="card-title">{product.title}</h5>
                 <p className="card-text fw-bold text-pink mb-2">{product.price}</p>
                 <div className="mt-auto d-flex align-items-center justify-content-between w-100">
-                  <a href="#" className="btn btn-success btn-sm custom-btn">Voir plus</a>
-                  <button className="btn btn-outline-danger rounded-circle custom-cart-btn ms-2" aria-label="Ajouter au panier">
+                  <Link 
+                    to={`/product/${product.id}`} 
+                    className="btn btn-success btn-sm custom-btn"
+                  >
+                    Voir plus
+                  </Link>
+                  <button className="btn btn-outline-danger rounded-circle custom-cart-btn ms-2">
                     <i className="bi bi-cart"></i>
                   </button>
                 </div>

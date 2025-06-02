@@ -1,36 +1,40 @@
 import React from "react";
-import { Link } from "react-router-dom"; // Ajoutez cet import
 import "../styles/Login.css";
-import cakeImg from "../assets/fraise.png"; // Assurez-vous que ce fichier existe
+import cakeImg from "../assets/fraise.png"; // Assure-toi que le chemin est correct
 
-const Login = () => {
+const Inscription = () => {
   return (
     <div className="login-page">
       <div className="login-left">
         <img src={cakeImg} alt="Illustration dessert" className="login-image" />
       </div>
       <div className="login-right">
-        <h2>Connexion</h2>
+        <h2>Inscription</h2>
         <form className="login-form">
           <label>
-            Mail
+            Nom
+            <input type="text" placeholder="Value" />
+          </label>
+          <label>
+            Prénom
+            <input type="text" placeholder="Value" />
+          </label>
+          <label>
+            Adresse
             <input type="email" placeholder="Value" />
           </label>
           <label>
             Mot de passe
             <input type="password" placeholder="Value" />
           </label>
-          <div className="login-forgot">
-            <a href="#">Mot de passe oublié ?</a>
-          </div>
-          <button type="submit">Connexion</button>
+          <button type="submit">S'inscrire</button>
         </form>
         <p className="login-register">
-          Tu n'as pas de compte ? <Link to="/register">Inscris-toi maintenant</Link>
+          Tu as déjà un compte ? <a href="#">Connecte toi</a>
         </p>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default Inscription;
