@@ -1,0 +1,68 @@
+.quote-section {
+    background-color: #F5DADA;
+    margin: 9rem auto 9rem auto;
+    padding: 2rem;
+    border-radius: 2.5rem;
+    width: 60%;
+    max-width: 100%;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+  
+.quote-text {
+    font-size: clamp(1.2rem, 4vw, 2rem);
+    text-align: center;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+    color: #8B4A4A;
+}
+  
+@media (min-width: 768px) {
+    .quote-text {
+      font-size: 1.5rem;
+    }
+}
+  
+.quote-author {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 1rem;
+}
+  
+.quote-author img {
+    width: clamp(50px, 15vw, 80px);
+    height: auto;
+    border-radius: 50%;
+    border: 2px solid #f472b6; /* border-pink-400 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+  
+.quote-author-info {
+    text-align: center;
+    font-size: 0.875rem;
+    color: #1f2937; /* text-gray-800 */
+}
+  
+.quote-author-info .font-semibold {
+    font-size: clamp(1rem, 3vw, 1.5rem);
+}
+  
+.quote-author-info .italic {
+    font-size: clamp(0.8rem, 2.5vw, 1.2rem);
+    color: #6b7280; /* text-gray-600 */
+}
+
+@media (min-width: 768px) {
+  .quote-author {
+    justify-content: flex-start;
+  }
+  
+  .quote-author-info {
+    text-align: left;
+  }
+}

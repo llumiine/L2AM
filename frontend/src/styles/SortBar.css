@@ -1,0 +1,28 @@
+.sort-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  
+  .sort-label {
+    font-weight: bold;
+    margin-right: 0.5rem;
+  }
+  
+  .sort-button {
+    padding: 0.5rem 1rem;
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+  }
+  
+  .sort-button:hover {
+    background-color: #e2ede1;
+  }
+  

@@ -1,0 +1,13 @@
+.shop-container {
+    display: flex;
+    gap: 2rem;
+    padding: 2rem;
+  }
+  
+  .shop-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
