@@ -1,6 +1,6 @@
 package com.l2am.backend.controller;
 
-import com.l2am.backend.entity.Facture;
+import com.l2am.backend.model.Facture;   // ✅ Correct
 import com.l2am.backend.repository.FactureRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
