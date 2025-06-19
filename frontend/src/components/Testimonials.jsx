@@ -1,43 +1,74 @@
+import React from 'react';
 import "../styles/Testimonials.css";
 
 const testimonials = [
   {
     id: 1,
-    name: "Aline D.",
-    text: "Une artiste incroyable, les œuvres sont encore plus belles en vrai ! ❤️",
-    avatar: "/src/assets/avatar1.jpg",
+    name: "Sarah",
+    rating: 4,
+    date: "01/03/2025"
   },
   {
     id: 2,
-    name: "Lucas M.",
-    text: "Ma commande est arrivée rapidement et parfaitement emballée. Merci !",
-    avatar: "/src/assets/avatar2.jpg",
+    name: "Milena",
+    rating: 5,
+    date: "05/01/2025"
   },
   {
     id: 3,
-    name: "Sophie T.",
-    text: "Les couleurs, les détails… tout respire la poésie. Je recommande !",
-    avatar: "/src/assets/avatar3.jpg",
+    name: "Catherine",
+    rating: 5,
+    date: "16/12/2024"
   },
+  {
+    id: 4,
+    name: "Michael Jackson",
+    rating: 5,
+    date: "23/11/2024"
+  }
 ];
 
 export default function Testimonials() {
-  return (
-    <section className="testimonials-section">
-      <div className="testimonials-header">
-        <h2>Avis de mes Stars ✨</h2>
-        <p>Ils parlent de leur expérience avec mes créations</p>
-      </div>
+  const renderStars = (rating) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      if (i <= rating) {
+        stars.push(<span key={i} className="star filled">★</span>);
+      } else {
+        stars.push(<span key={i} className="star empty">★</span>);
+      }
+    }
+    return stars;
+  };
 
-      <div className="testimonials-grid">
-        {testimonials.map((t) => (
-          <div key={t.id} className="testimonial-card">
-            <img src={t.avatar} alt={t.name} />
-            <p>“{t.text}”</p>
-            <div className="author">{t.name}</div>
+  return (
+      <section className="testimonials-section">
+        <div className="testimonials-container">
+          <h2 className="testimonials-title">Que disent mes Stars ✨</h2>
+
+          <div className="testimonials-grid">
+            {testimonials.map((testimonial) => (
+                <div key={testimonial.id} className="testimonial-card">
+                  <div className="stars-row">
+                    {renderStars(testimonial.rating)}
+                  </div>
+
+                  <h3 className="card-title">Review title</h3>
+                  <p className="card-subtitle">Review body</p>
+
+                  <div className="profile-section">
+                    <div className="profile-avatar">
+                      <span>{testimonial.name.charAt(0)}</span>
+                    </div>
+                    <div className="profile-text">
+                      <div className="profile-name">{testimonial.name}</div>
+                      <div className="profile-date">{testimonial.date}</div>
+                    </div>
+                  </div>
+                </div>
+            ))}
           </div>
-        ))}
-      </div>
-    </section>
+        </div>
+      </section>
   );
 }

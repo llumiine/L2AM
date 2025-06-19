@@ -1,79 +1,91 @@
+import React from 'react';
 import "../styles/ProductGrid.css";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { Link } from "react-router-dom";  // Ajoutez cet import en haut
+import { Link } from "react-router-dom";
 
 const products = [
   {
     id: 1,
-    title: "Papillons roses",
-    price: "29 €",
+    title: "Gâteau Fraise Digital",
+    price: "5€",
     image: "/src/assets/art1.jpg",
   },
   {
     id: 2,
-    title: "Univers floral",
-    price: "35 €",
+    title: "Porte-Bijoux Argile",
+    price: "20€",
     image: "/src/assets/art2.jpg",
   },
   {
     id: 3,
-    title: "Forêt magique",
-    price: "40 €",
+    title: "Calligraphy Bleu",
+    price: "10€",
     image: "/src/assets/art3.jpg",
   },
   {
     id: 4,
-    title: "Rêverie nocturne",
-    price: "45 €",
+    title: "L'attaque des titans digital",
+    price: "15€",
     image: "/src/assets/art4.jpg",
   },
   {
     id: 5,
-    title: "Aurore boréale",
-    price: "38 €",
+    title: "Calligraphy Vert",
+    price: "15€",
     image: "/src/assets/art5.jpg",
   },
   {
     id: 6,
-    title: "Jardin zen",
-    price: "42 €",
+    title: "Lac féerique",
+    price: "15€",
     image: "/src/assets/art6.jpg",
   },
-  
 ];
 
 export default function ProductGrid() {
   return (
-    <section className="product-section">
-      <div className="product-header">
-        <h2>Les plus populaires</h2>
-        <p>Mes œuvres les plus appréciées par la communauté</p>
-      </div>
-
-      <div className="row row-cols-1 row-cols-md-3 gx-1 g-4">
-        {products.map((product) => (
-          <div className="col" key={product.id}>
-            <div className="card h-100 custom-card">
-              <img src={product.image} className="card-img-top" alt={product.title} />
-              <div className="card-body d-flex flex-column">
-                <h5 className="card-title">{product.title}</h5>
-                <p className="card-text fw-bold text-pink mb-2">{product.price}</p>
-                <div className="mt-auto d-flex align-items-center justify-content-between w-100">
-                  <Link 
-                    to={`/product/${product.id}`} 
-                    className="btn btn-success btn-sm custom-btn"
-                  >
-                    Voir plus
-                  </Link>
-                  <button className="btn btn-outline-danger rounded-circle custom-cart-btn ms-2">
-                    <i className="bi bi-cart"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
+      <section className="product-section">
+        <div className="product-container">
+          <div className="product-header">
+            <h2 className="section-title">Les plus populaires</h2>
+            <div className="title-underline"></div>
           </div>
-        ))}
-      </div>
-    </section>
+
+          <div className="products-grid">
+            {products.map((product) => (
+                <div key={product.id} className="product-card">
+                  <div className="product-image-container">
+                    <img
+                        src={product.image}
+                        alt={product.title}
+                        className="product-image"
+                    />
+                  </div>
+
+                  <div className="product-info">
+                    <h3 className="product-title">{product.title}</h3>
+                    <p className="product-price">{product.price}</p>
+
+                    <div className="product-actions">
+                      <Link
+                          to={`/product/${product.id}`}
+                          className="btn-voir-plus"
+                      >
+                        Voir plus
+                      </Link>
+
+                      <button className="btn-cart">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <circle cx="9" cy="21" r="1"/>
+                          <circle cx="20" cy="21" r="1"/>
+                          <path d="m1 1 4 4 2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+            ))}
+          </div>
+        </div>
+      </section>
   );
 }

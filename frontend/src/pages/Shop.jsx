@@ -11,7 +11,6 @@ const Shop = () => {
       <FilterSidebar />
       <div className="shop-main">
         <SearchBar />
-        <SortBar />
         <ProductGrid />
       </div>
     </div>

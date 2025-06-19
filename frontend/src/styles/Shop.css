@@ -1,13 +1,80 @@
+/* Shop Page - Fond blanc étendu et layout plus grand */
 .shop-container {
+    background-color: #ffffff;
+    min-height: 100vh;
+    padding: 3rem; /* Agrandi de 2rem à 3rem */
     display: flex;
-    gap: 2rem;
-    padding: 2rem;
-  }
-  
-  .shop-main {
+    gap: 3rem; /* Agrandi de 2rem à 3rem */
+    max-width: 1600px; /* Agrandi de 1400px à 1600px */
+    margin: 0 auto;
+    width: 100%; /* Assure que le container prend toute la largeur disponible */
+}
+
+/* Section principale (contenu à droite) */
+.shop-main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
-  }
-  
+    gap: 2.5rem; /* Agrandi de 2rem à 2.5rem */
+    background-color: #ffffff;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .shop-container {
+        padding: 1.5rem;
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .shop-container {
+        flex-direction: column;
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .shop-main {
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .shop-container {
+        padding: 0.5rem;
+    }
+
+    .shop-main {
+        gap: 1rem;
+    }
+}
+
+/* Assurer que le fond blanc s'étend sur toute la page */
+body {
+    background-color: #ffffff;
+    margin: 0; /* Supprime les marges par défaut */
+    padding: 0; /* Supprime le padding par défaut */
+}
+
+/* Style pour la page Shop spécifiquement */
+.shop-page {
+    background-color: #ffffff;
+    min-height: 100vh;
+    width: 100vw; /* Prend toute la largeur de la fenêtre */
+    margin: 0;
+    padding: 0;
+}
+
+/* Ajustements pour les composants enfants */
+.shop-container .filter-sidebar {
+    flex-shrink: 0;
+}
+
+.shop-container .search-bar-container {
+    background-color: transparent;
+}
+
+.shop-container .products-section {
+    background-color: #ffffff;
+    padding: 0;
+}
