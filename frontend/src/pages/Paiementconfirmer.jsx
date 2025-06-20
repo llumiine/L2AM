@@ -1,5 +1,5 @@
 import React from 'react';
-import './PaiementConfirmer.css';
+import '../styles/Paiementconfirmer.css'; // Correction du chemin d'importation
 
 const PaiementConfirmer = () => {
     const handleRetourAccueil = () => {

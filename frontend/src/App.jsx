@@ -10,6 +10,11 @@ import Propos from "./pages/Propos"; // Vérifiez que l'import est présent
 import Contact from "./pages/Contact"; // Ajoutez cet import
 import Panier from "./pages/Panier"; // Ajoutez cet import
 import Paiement from "./pages/Paiement"; // Ajoutez cet import
+import PageClient from "./pages/Pageclient";
+import AdresseCommande from "./pages/Adressecommande";
+import PaiementConfirmer from "./pages/Paiementconfirmer";
+import Admin from "./pages/Admin";
+import Gestionadmin from "./pages/Gestionadmin";
 
 function Layout() {
   return (
@@ -25,6 +30,11 @@ function Layout() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/panier" element={<Panier />} /> {/* Ajoutez cette route */}
         <Route path="/paiement" element={<Paiement />} /> {/* Ajoutez cette route */}
+        <Route path="/client" element={<PageClient />} />
+        <Route path="/adresse-commande" element={<AdresseCommande />} />
+        <Route path="/paiement-confirmer" element={<PaiementConfirmer />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/Gestion-admin" element={<Gestionadmin />} />
       </Routes>
       <Footer />
     </div>
