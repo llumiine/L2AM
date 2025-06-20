@@ -1,0 +1,251 @@
+/* PaiementConfirmer.css */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.confirmation-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    padding: 2rem;
+}
+
+.confirmation-card {
+    background: white;
+    border-radius: 20px;
+    padding: 4rem 3rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.confirmation-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #a8c4a0, #94b88a);
+}
+
+/* Icône de confirmation */
+.check-icon {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.check-svg {
+    animation: checkAnimation 0.8s ease-in-out;
+}
+
+@keyframes checkAnimation {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Titre principal */
+.confirmation-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1rem;
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+/* Sous-titre */
+.confirmation-subtitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #f87171;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.6s ease-out 0.4s both;
+}
+
+/* Message de confirmation */
+.confirmation-message {
+    margin-bottom: 3rem;
+    animation: fadeInUp 0.6s ease-out 0.6s both;
+}
+
+.confirmation-message p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #6b7280;
+    text-align: center;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* Bouton de retour */
+.retour-button {
+    background: #a8c4a0;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(168, 196, 160, 0.3);
+    animation: fadeInUp 0.6s ease-out 0.8s both;
+    min-width: 280px;
+}
+
+.retour-button:hover {
+    background: #94b88a;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(168, 196, 160, 0.4);
+}
+
+.retour-button:active {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(168, 196, 160, 0.3);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Effet de particules subtil */
+.confirmation-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(168, 196, 160, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+    animation: float 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes float {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .confirmation-container {
+        padding: 1rem;
+    }
+
+    .confirmation-card {
+        padding: 3rem 2rem;
+    }
+
+    .confirmation-title {
+        font-size: 1.875rem;
+    }
+
+    .confirmation-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .confirmation-message p {
+        font-size: 0.95rem;
+    }
+
+    .retour-button {
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+        min-width: 250px;
+    }
+
+    .check-icon {
+        margin-bottom: 1.5rem;
+    }
+
+    .check-svg {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+@media (max-width: 480px) {
+    .confirmation-card {
+        padding: 2rem 1.5rem;
+        border-radius: 15px;
+    }
+
+    .confirmation-title {
+        font-size: 1.5rem;
+    }
+
+    .confirmation-subtitle {
+        font-size: 0.8rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .confirmation-message {
+        margin-bottom: 2rem;
+    }
+
+    .confirmation-message p {
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .retour-button {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        min-width: 200px;
+    }
+
+    .check-svg {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* Animation de succès pour l'ensemble de la page */
+.confirmation-container {
+    animation: pageLoad 0.8s ease-out;
+}
+
+@keyframes pageLoad {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

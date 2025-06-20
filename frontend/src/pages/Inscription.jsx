@@ -4,7 +4,9 @@ import "../styles/Login.css";
 import cakeImg from "../assets/fraise.png";
 
 const Inscription = () => {
-  const [username, setUsername] = useState("");
+  const [nom, setNom] = useState("");
+  const [prenom, setPrenom] = useState("");
+  const [adresse, setAdresse] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = async (e) => {
@@ -12,7 +14,9 @@ const Inscription = () => {
 
     try {
       const response = await axios.post("http://localhost:9090/api/auth/register", {
-        username,
+        nom,
+        prenom,
+        adresse,
         password,
       });
       console.log("Inscription réussie:", response.data);
@@ -32,12 +36,32 @@ const Inscription = () => {
           <h2>Inscription</h2>
           <form className="login-form" onSubmit={handleSubmit}>
             <label>
-              Nom d'utilisateur
+              Nom
               <input
                   type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Nom d'utilisateur"
+                  value={nom}
+                  onChange={(e) => setNom(e.target.value)}
+                  placeholder="Valeur"
+                  required
+              />
+            </label>
+            <label>
+              Prénom
+              <input
+                  type="text"
+                  value={prenom}
+                  onChange={(e) => setPrenom(e.target.value)}
+                  placeholder="Valeur"
+                  required
+              />
+            </label>
+            <label>
+              Adresse
+              <input
+                  type="text"
+                  value={adresse}
+                  onChange={(e) => setAdresse(e.target.value)}
+                  placeholder="Valeur"
                   required
               />
             </label>
@@ -47,7 +71,7 @@ const Inscription = () => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Mot de passe"
+                  placeholder="Valeur"
                   required
               />
             </label>
