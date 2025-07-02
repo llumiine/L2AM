@@ -182,16 +182,16 @@
 
 .carousel-track {
   display: flex;
-  width: 400%;
   height: 100%;
   transition: transform 0.5s ease-in-out;
+  width: 100%; /* ✅ ne jamais figer à 400% */
 }
 
+
 .carousel-slide {
-  width: 25%;
+  flex: 0 0 100%; /* ✅ chaque slide prend 100% de la largeur du container */
   height: 100%;
   position: relative;
-  flex-shrink: 0;
 }
 
 .image-container {

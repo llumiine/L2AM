@@ -16,6 +16,7 @@ import PaiementConfirmer from "./pages/Paiementconfirmer";
 import Admin from "./pages/Admin";
 import Gestionadmin from "./pages/Gestionadmin";
 
+
 function Layout() {
   return (
     <div className="font-sans text-gray-800">
@@ -35,6 +36,8 @@ function Layout() {
         <Route path="/paiement-confirmer" element={<PaiementConfirmer />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/Gestion-admin" element={<Gestionadmin />} />
+        <Route path="/product/:id" element={<ProductPage />} />
+
       </Routes>
       <Footer />
     </div>
