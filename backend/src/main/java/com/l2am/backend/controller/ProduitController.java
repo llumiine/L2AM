@@ -12,67 +12,75 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/produits")
-@CrossOrigin(origins = "http://localhost:3000")
+@RequestMapping("/api")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 public class ProduitController {
 
     @Autowired
     private ProduitService produitService;
 
-    @PostMapping
+    @PostMapping("/produits")
     public ResponseEntity<Produit> creerProduit(@RequestBody Produit produit) {
         Produit nouveauProduit = produitService.creerProduit(produit);
         return ResponseEntity.ok(nouveauProduit);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/produits/{id}")
     public ResponseEntity<Produit> getProduit(@PathVariable Long id) {
         Optional<Produit> produit = produitService.trouverParId(id);
         return produit.map(ResponseEntity::ok)
                       .orElse(ResponseEntity.notFound().build());
+    }    @GetMapping("/produits")
+    public ResponseEntity<List<Produit>> getTousLesProduits(
+            @RequestParam(required = false) List<Long> types,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) List<String> sizes
+    ) {
+        try {
+            List<Produit> produits = produitService.getProduitsFiltres(types, maxPrice, sizes);
+            return ResponseEntity.ok(produits);
+        } catch (Exception e) {
+            e.printStackTrace(); // Pour le débogage
+            return ResponseEntity.status(500).body(null);
+        }
     }
 
-    @GetMapping
-    public ResponseEntity<List<Produit>> getTousLesProduits() {
-        return ResponseEntity.ok(produitService.listerTous());
-    }
-
-    @GetMapping("/recherche")
+    @GetMapping("/produits/recherche")
     public ResponseEntity<List<Produit>> rechercherParNom(@RequestParam String nom) {
         return ResponseEntity.ok(produitService.rechercherParNom(nom));
     }
 
-    @GetMapping("/stock")
+    @GetMapping("/produits/stock")
     public ResponseEntity<List<Produit>> getProduitsEnStock() {
         return ResponseEntity.ok(produitService.listerEnStock());
     }
 
-    @GetMapping("/prix")
+    @GetMapping("/produits/prix")
     public ResponseEntity<List<Produit>> getProduitsParPrix(
             @RequestParam BigDecimal min,
             @RequestParam BigDecimal max) {
         return ResponseEntity.ok(produitService.listerParPrix(min, max));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/produits/{id}")
     public ResponseEntity<Produit> mettreAJourProduit(@PathVariable Long id, @RequestBody Produit produit) {
         produit.setId(id);
         Produit updated = produitService.mettreAJour(produit);
         return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/produits/{id}")
     public ResponseEntity<Void> supprimerProduit(@PathVariable Long id) {
         produitService.supprimer(id);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/count/stock")
+    @GetMapping("/produits/count/stock")
     public ResponseEntity<Long> compterProduitsEnStock() {
         return ResponseEntity.ok(produitService.compterEnStock());
     }
 
-    @PutMapping("/stock/{id}")
+    @PutMapping("/produits/stock/{id}")
     public ResponseEntity<String> diminuerStock(@PathVariable Long id, @RequestParam Integer quantite) {
         boolean success = produitService.diminuerStock(id, quantite);
         if (success) {
@@ -82,8 +90,28 @@ public class ProduitController {
         }
     }
 
-    @GetMapping("/recherche/globale")
+    @GetMapping("/produits/recherche/globale")
     public ResponseEntity<List<Produit>> rechercheGlobale(@RequestParam String q) {
         return ResponseEntity.ok(produitService.rechercheGlobale(q));
+    }
+
+    @GetMapping("/types-oeuvre")
+    public ResponseEntity<List<TypeOeuvre>> getAllTypesOeuvre() {
+        try {
+            List<TypeOeuvre> types = produitService.getAllTypesOeuvre();
+            return ResponseEntity.ok(types);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/produits/prix-max")
+    public ResponseEntity<Double> getPrixMaximum() {
+        try {
+            Double prixMax = produitService.getPrixMaximum();
+            return ResponseEntity.ok(prixMax);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

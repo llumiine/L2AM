@@ -1,13 +1,14 @@
 package com.l2am.backend.controller;
 
+import com.l2am.backend.dto.AuthResponse;
+import com.l2am.backend.entity.Utilisateur;
+import com.l2am.backend.service.JwtService;
+import com.l2am.backend.service.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import com.l2am.backend.entity.Utilisateur;
-import com.l2am.backend.service.UtilisateurService;
-import com.l2am.backend.service.JwtService;
-import com.l2am.backend.dto.AuthResponse;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,7 +28,10 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody Utilisateur utilisateur) {
-        // Encoder le mot de passe avant de le sauvegarder
+        if (utilisateurService.trouverParEmail(utilisateur.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().build(); // Email déjà utilisé
+        }
+
         utilisateur.setMdp(passwordEncoder.encode(utilisateur.getMdp()));
         Utilisateur created = utilisateurService.creerUtilisateur(utilisateur);
         String token = jwtService.generateToken(created);

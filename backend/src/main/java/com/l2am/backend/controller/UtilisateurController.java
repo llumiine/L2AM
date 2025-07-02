@@ -4,12 +4,14 @@ import com.l2am.backend.entity.Utilisateur;
 import com.l2am.backend.service.UtilisateurService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/utilisateurs")
 public class UtilisateurController {
@@ -37,7 +39,7 @@ public class UtilisateurController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Utilisateur> updateUtilisateur(@PathVariable Long id, @RequestBody Utilisateur utilisateur) {
-        utilisateur.setId(id); // À condition que ta classe Utilisateur ait bien `private Long id`
+        utilisateur.setId(id);
         Utilisateur updated = utilisateurService.mettreAJour(utilisateur);
         return ResponseEntity.ok(updated);
     }
@@ -46,5 +48,22 @@ public class UtilisateurController {
     public ResponseEntity<Void> deleteUtilisateur(@PathVariable Long id) {
         utilisateurService.supprimer(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ✅ Accessible uniquement aux admins
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/admin/clients")
+    public ResponseEntity<List<Utilisateur>> listerClients() {
+        return ResponseEntity.ok(utilisateurService.listerParRole(0)); // 0 = user
+    }
+
+    // ✅ Récupérer l'utilisateur connecté (pour savoir si c'est un admin côté React)
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Utilisateur> getCurrentUtilisateur(Authentication authentication) {
+        String email = authentication.getName(); // ou getPrincipal() selon config
+        Optional<Utilisateur> utilisateur = utilisateurService.trouverParEmail(email);
+        return utilisateur.map(ResponseEntity::ok)
+                          .orElse(ResponseEntity.notFound().build());
     }
 }

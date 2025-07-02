@@ -7,105 +7,116 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UtilisateurService implements UserDetailsService {
-    
+
     @Autowired
     private UtilisateurRepository utilisateurRepository;
-    
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     /**
-     * Créer un nouvel utilisateur
+     * Créer un nouvel utilisateur avec rôle USER par défaut
      */
     public Utilisateur creerUtilisateur(Utilisateur utilisateur) {
-        // Vérifier si l'email existe déjà
         if (utilisateurRepository.existsByEmail(utilisateur.getEmail())) {
             throw new RuntimeException("Email déjà utilisé");
         }
-        
-        // Vérifier si le username existe déjà
+
         if (utilisateurRepository.existsByUsername(utilisateur.getUsername())) {
             throw new RuntimeException("Username déjà utilisé");
         }
-        
+
+        utilisateur.setRole(0); // 0 = ROLE_USER
+        utilisateur.setMdp(passwordEncoder.encode(utilisateur.getMdp()));
         return utilisateurRepository.save(utilisateur);
     }
-    
+
     /**
-     * Trouver utilisateur par email (pour connexion)
+     * Trouver un utilisateur par email
      */
     public Optional<Utilisateur> trouverParEmail(String email) {
         return utilisateurRepository.findByEmail(email);
     }
-    
+
     /**
-     * Trouver utilisateur par ID
+     * Trouver un utilisateur par ID
      */
     public Optional<Utilisateur> trouverParId(Long id) {
         return utilisateurRepository.findById(id);
     }
-    
+
     /**
      * Lister tous les utilisateurs
      */
     public List<Utilisateur> listerTous() {
         return utilisateurRepository.findAll();
     }
-    
+
     /**
-     * Lister utilisateurs par rôle (0 = client, 1 = admin)
+     * Lister les utilisateurs par rôle (0 = USER, 1 = ADMIN)
      */
     public List<Utilisateur> listerParRole(Integer role) {
         return utilisateurRepository.findByRole(role);
     }
-    
+
     /**
      * Mettre à jour un utilisateur
      */
     public Utilisateur mettreAJour(Utilisateur utilisateur) {
         return utilisateurRepository.save(utilisateur);
     }
-    
+
     /**
      * Supprimer un utilisateur
      */
     public void supprimer(Long id) {
         utilisateurRepository.deleteById(id);
     }
-    
+
     /**
-     * Compter le nombre de clients
-     */
-    public Long compterClients() {
-        return utilisateurRepository.compterClients();
-    }
-    
-    /**
-     * Rechercher utilisateurs par nom ou prénom
+     * Rechercher par nom ou prénom
      */
     public List<Utilisateur> rechercherParNom(String terme) {
         return utilisateurRepository.rechercherParNomOuPrenom(terme);
     }
-    
+
+    /**
+     * Compter les utilisateurs avec rôle USER
+     */
+    public Long compterClients() {
+        return utilisateurRepository.compterClients();
+    }
+
     /**
      * Vérifier si un utilisateur existe
      */
     public boolean existe(Long id) {
         return utilisateurRepository.existsById(id);
     }
-    
+
+    /**
+     * Authentification : Spring Security
+     */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return utilisateurRepository.findByEmail(email)
-            .map(user -> new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getMdp(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
-            ))
+            .map(user -> {
+                String roleName = (user.getRole() == 1) ? "ROLE_ADMIN" : "ROLE_USER";
+                return new org.springframework.security.core.userdetails.User(
+                    user.getEmail(),
+                    user.getMdp(),
+                    Collections.singletonList(new SimpleGrantedAuthority(roleName))
+                );
+            })
             .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec l'email : " + email));
     }
 }
