@@ -1,9 +1,32 @@
-import React from "react";
-import { Link } from "react-router-dom"; // Ajoutez cet import
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
 import "../styles/Login.css";
-import cakeImg from "../assets/fraise.png"; // Assurez-vous que ce fichier existe
+import cakeImg from "../assets/fraise.png";
 
 const Login = () => {
+  const [email, setEmail] = useState("");
+  const [mdp, setMdp] = useState(""); // Doit correspondre au backend
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post("http://localhost:9090/api/auth/login", {
+        email,
+        mdp,
+      });
+
+      console.log("Connexion réussie :", response.data);
+      alert("Connexion réussie !");
+      // Tu peux stocker le user dans localStorage ici si tu veux :
+      // localStorage.setItem("user", JSON.stringify(response.data));
+    } catch (error) {
+      console.error("Erreur de connexion :", error);
+      alert("Email ou mot de passe incorrect.");
+    }
+  };
+
   return (
     <div className="login-page">
       <div className="login-left">
@@ -11,14 +34,26 @@ const Login = () => {
       </div>
       <div className="login-right">
         <h2>Connexion</h2>
-        <form className="login-form">
+        <form className="login-form" onSubmit={handleSubmit}>
           <label>
             Mail
-            <input type="email" placeholder="Value" />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="Votre email"
+            />
           </label>
           <label>
             Mot de passe
-            <input type="password" placeholder="Value" />
+            <input
+              type="password"
+              value={mdp}
+              onChange={(e) => setMdp(e.target.value)}
+              required
+              placeholder="Votre mot de passe"
+            />
           </label>
           <div className="login-forgot">
             <a href="#">Mot de passe oublié ?</a>
