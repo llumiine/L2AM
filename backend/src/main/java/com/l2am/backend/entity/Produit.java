@@ -1,6 +1,8 @@
 package com.l2am.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 
 @Entity
@@ -33,10 +35,12 @@ public class Produit {
     @Column(name = "image", length = 100)
     private String image;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_type_oeuvre", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private TypeOeuvre typeOeuvre;
 
+    // Constructeurs
     public Produit() {}
 
     public Produit(String nom, BigDecimal prix, Integer stock, TypeOeuvre typeOeuvre) {
@@ -46,30 +50,76 @@ public class Produit {
         this.typeOeuvre = typeOeuvre;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // Getters et setters
+    public Long getId() {
+        return id;
+    }
 
-    public String getNom() { return nom; }
-    public void setNom(String nom) { this.nom = nom; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public BigDecimal getPrix() { return prix; }
-    public void setPrix(BigDecimal prix) { this.prix = prix; }
+    public String getNom() {
+        return nom;
+    }
 
-    public Integer getStock() { return stock; }
-    public void setStock(Integer stock) { this.stock = stock; }
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public BigDecimal getPrix() {
+        return prix;
+    }
 
-    public String getCouleur() { return couleur; }
-    public void setCouleur(String couleur) { this.couleur = couleur; }
+    public void setPrix(BigDecimal prix) {
+        this.prix = prix;
+    }
 
-    public String getTaille() { return taille; }
-    public void setTaille(String taille) { this.taille = taille; }
+    public Integer getStock() {
+        return stock;
+    }
 
-    public String getImage() { return image; }
-    public void setImage(String image) { this.image = image; }
+    public void setStock(Integer stock) {
+        this.stock = stock;
+    }
 
-    public TypeOeuvre getTypeOeuvre() { return typeOeuvre; }
-    public void setTypeOeuvre(TypeOeuvre typeOeuvre) { this.typeOeuvre = typeOeuvre; }
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getCouleur() {
+        return couleur;
+    }
+
+    public void setCouleur(String couleur) {
+        this.couleur = couleur;
+    }
+
+    public String getTaille() {
+        return taille;
+    }
+
+    public void setTaille(String taille) {
+        this.taille = taille;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public TypeOeuvre getTypeOeuvre() {
+        return typeOeuvre;
+    }
+
+    public void setTypeOeuvre(TypeOeuvre typeOeuvre) {
+        this.typeOeuvre = typeOeuvre;
+    }
 }
