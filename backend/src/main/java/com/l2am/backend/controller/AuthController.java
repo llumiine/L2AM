@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5173") // Port React correct
 public class AuthController {
 
     @Autowired
@@ -29,26 +29,44 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody Utilisateur utilisateur) {
         if (utilisateurService.trouverParEmail(utilisateur.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().build(); // Email déjà utilisé
+            return ResponseEntity.badRequest().body(null); // Email déjà utilisé
         }
 
+        // Hachage du mot de passe
         utilisateur.setMdp(passwordEncoder.encode(utilisateur.getMdp()));
+
+        // Création utilisateur
         Utilisateur created = utilisateurService.creerUtilisateur(utilisateur);
+
+        // Génération token
         String token = jwtService.generateToken(created);
+
+        // Réponse avec token + utilisateur
         return ResponseEntity.ok(new AuthResponse(token, created));
     }
+@PostMapping("/login")
+public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
+    String email = credentials.get("email");
+    String mdp = credentials.get("mdp");
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
-        String email = credentials.get("email");
-        String mdp = credentials.get("mdp");
+    System.out.println("Utilisateur cherché : " + email);
+    Optional<Utilisateur> userOpt = utilisateurService.trouverParEmail(email);
+    if (userOpt.isPresent()) {
+        Utilisateur user = userOpt.get();
+        System.out.println("Utilisateur trouvé : " + user.getEmail());
+        System.out.println("Mot de passe envoyé : '" + mdp + "'");
+        System.out.println("Mot de passe hashé stocké : " + user.getMdp());
 
-        Optional<Utilisateur> userOpt = utilisateurService.trouverParEmail(email);
-        if (userOpt.isPresent() && passwordEncoder.matches(mdp, userOpt.get().getMdp())) {
-            String token = jwtService.generateToken(userOpt.get());
-            return ResponseEntity.ok(new AuthResponse(token, userOpt.get()));
-        } else {
-            return ResponseEntity.status(401).body("Identifiants invalides");
+        boolean matches = passwordEncoder.matches(mdp, user.getMdp());
+        System.out.println("Mot de passe correspond ? " + matches);
+        if (matches) {
+            String token = jwtService.generateToken(user);
+            return ResponseEntity.ok(new AuthResponse(token, user));
         }
     }
+    System.out.println("Mot de passe incorrect");
+    return ResponseEntity.status(401).body("Identifiants invalides");
+}
+
+
 }

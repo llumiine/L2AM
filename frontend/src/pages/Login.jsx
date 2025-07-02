@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/Login.css";
 import cakeImg from "../assets/fraise.png";
 
 const Login = () => {
   const [email, setEmail] = useState("");
-  const [mdp, setMdp] = useState(""); // Doit correspondre au backend
+  const [mdp, setMdp] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,13 +18,16 @@ const Login = () => {
         mdp,
       });
 
-      console.log("Connexion réussie :", response.data);
+      // Stockage du token et des infos utilisateur
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.utilisateur));      console.log("Connexion réussie :", response.data);
       alert("Connexion réussie !");
-      // Tu peux stocker le user dans localStorage ici si tu veux :
-      // localStorage.setItem("user", JSON.stringify(response.data));
+
+      // Redirection après connexion réussie
+      navigate("/accueil");
     } catch (error) {
-      console.error("Erreur de connexion :", error);
-      alert("Email ou mot de passe incorrect.");
+      console.error("Erreur de connexion :", error.response);
+      alert(error.response?.data || "Email ou mot de passe incorrect.");
     }
   };
 

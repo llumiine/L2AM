@@ -36,18 +36,18 @@ const ProductPage = () => {
           border: '1px solid #e8f5e8'
         }}>
           <div style={{ flexShrink: 0, width: '450px' }}>
-            <div style={{ position: 'relative' }}>
-              <img
-                src={product.imageUrl}
-                alt={product.nom}
-                style={{
-                  width: '100%',
-                  height: '350px',
-                  objectFit: 'cover',
-                  borderRadius: '16px',
-                  boxShadow: '0 12px 40px rgba(168, 196, 160, 0.3)'
-                }}
-              />
+            <div style={{ position: 'relative' }}>              <img
+  src={`http://localhost:9090/uploads/${product.image}`}
+
+  alt={product.nom}
+  style={{
+    width: '100%',
+    height: '350px',
+    objectFit: 'cover',
+    borderRadius: '16px',
+    boxShadow: '0 12px 40px rgba(168, 196, 160, 0.3)'
+  }}
+/>
               <div style={{
                 position: 'absolute',
                 top: '1rem',
