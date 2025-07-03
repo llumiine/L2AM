@@ -24,7 +24,7 @@ const Login = () => {
       alert("Connexion réussie !");
 
       // Redirection après connexion réussie
-      navigate("/accueil");
+navigate("/pageclient");
     } catch (error) {
       console.error("Erreur de connexion :", error.response);
       alert(error.response?.data || "Email ou mot de passe incorrect.");

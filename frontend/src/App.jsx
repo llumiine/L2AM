@@ -14,6 +14,8 @@ import PageClient from "./pages/Pageclient";
 import AdresseCommande from "./pages/Adressecommande";
 import PaiementConfirmer from "./pages/Paiementconfirmer";
 import Admin from "./pages/Admin";
+import { CartProvider } from './context/CartContext'; // IMPORTANT : Ajoutez cette ligne
+
 import Gestionadmin from "./pages/Gestionadmin";
 
 
@@ -31,8 +33,9 @@ function Layout() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/panier" element={<Panier />} /> {/* Ajoutez cette route */}
         <Route path="/paiement" element={<Paiement />} /> {/* Ajoutez cette route */}
-        <Route path="/client" element={<PageClient />} />
-        <Route path="/adresse-commande" element={<AdresseCommande />} />
+<Route path="/Pageclient" element={<PageClient />} /> 
+<Route path="/client" element={<PageClient />} />
+       <Route path="/adresse-commande" element={<AdresseCommande />} />
         <Route path="/paiement-confirmer" element={<PaiementConfirmer />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/Gestion-admin" element={<Gestionadmin />} />

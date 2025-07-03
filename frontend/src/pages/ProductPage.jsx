@@ -1,21 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const ProductPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [showDescription, setShowDescription] = useState(false);
   const [product, setProduct] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     axios.get(`http://localhost:9090/api/produits/${id}`)
       .then((res) => setProduct(res.data))
       .catch((err) => console.error(err));
+
+    // Vérifier si l'utilisateur est connecté
+    checkUserAuthentication();
   }, [id]);
 
+  const checkUserAuthentication = () => {
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+    
+    if (token && userData) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  };
+
   const handleAddToCart = () => {
-    alert(`Ajouté au panier : ${quantity} exemplaire(s)`);
+    if (!isLoggedIn) {
+      // Rediriger vers la page de connexion si pas connecté
+      navigate('/login');
+      return;
+    }
+
+    // Si connecté, ajouter au panier
+    alert(`Ajouté au panier : ${quantity} exemplaire(s) de ${product.nom}`);
   };
 
   if (!product) return <div style={{ padding: "3rem", textAlign: "center" }}>Chargement...</div>;
@@ -36,18 +59,18 @@ const ProductPage = () => {
           border: '1px solid #e8f5e8'
         }}>
           <div style={{ flexShrink: 0, width: '450px' }}>
-            <div style={{ position: 'relative' }}>              <img
-  src={`http://localhost:9090/uploads/${product.image}`}
-
-  alt={product.nom}
-  style={{
-    width: '100%',
-    height: '350px',
-    objectFit: 'cover',
-    borderRadius: '16px',
-    boxShadow: '0 12px 40px rgba(168, 196, 160, 0.3)'
-  }}
-/>
+            <div style={{ position: 'relative' }}>
+              <img
+                src={`http://localhost:9090/uploads/${product.image}`}
+                alt={product.nom}
+                style={{
+                  width: '100%',
+                  height: '350px',
+                  objectFit: 'cover',
+                  borderRadius: '16px',
+                  boxShadow: '0 12px 40px rgba(168, 196, 160, 0.3)'
+                }}
+              />
               <div style={{
                 position: 'absolute',
                 top: '1rem',
@@ -117,6 +140,21 @@ const ProductPage = () => {
               <p style={{ color: '#7a8a77' }}>Livraison gratuite incluse</p>
             </div>
 
+            {/* Message si l'utilisateur n'est pas connecté */}
+            {!isLoggedIn && (
+              <div style={{
+                backgroundColor: '#fff3cd',
+                color: '#856404',
+                padding: '1rem',
+                borderRadius: '8px',
+                marginBottom: '1rem',
+                fontSize: '0.9rem',
+                border: '1px solid #ffeaa7'
+              }}>
+                🔒 Vous devez être connecté pour ajouter des produits au panier
+              </div>
+            )}
+
             <div style={{ marginBottom: '2rem' }}>
               <label style={{
                 display: 'block',
@@ -151,17 +189,20 @@ const ProductPage = () => {
               style={{
                 width: '100%',
                 padding: '1.3rem 2rem',
-                background: 'linear-gradient(135deg, #a8c4a0, #8fb085)',
+                background: isLoggedIn 
+                  ? 'linear-gradient(135deg, #a8c4a0, #8fb085)' 
+                  : 'linear-gradient(135deg, #6c757d, #5a6268)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '12px',
                 fontSize: '1.1rem',
                 fontWeight: '600',
                 cursor: 'pointer',
-                marginBottom: '2rem'
+                marginBottom: '2rem',
+                transition: 'all 0.3s ease'
               }}
             >
-              Ajouter au panier
+              {isLoggedIn ? 'Ajouter au panier' : 'Se connecter pour acheter'}
             </button>
 
             <div style={{

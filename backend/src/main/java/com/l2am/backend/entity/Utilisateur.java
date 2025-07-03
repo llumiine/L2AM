@@ -1,5 +1,6 @@
 package com.l2am.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,20 +18,20 @@ public class Utilisateur implements UserDetails {
 
     private String email;
     private String mdp;
+    
+    @JsonProperty("username") // Force Jackson à utiliser ce champ pour "username"
     private String username;
+    
     private String nom;
     private String prenom;
     private String adresse;
     private String ville;
     private String codePostal;
-
-    // 0 = USER, 1 = ADMIN
     private Integer role;
 
     public Utilisateur() {}
 
-    // Getters et setters classiques...
-
+    // Getters et setters normaux
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -40,7 +41,8 @@ public class Utilisateur implements UserDetails {
     public String getMdp() { return mdp; }
     public void setMdp(String mdp) { this.mdp = mdp; }
 
-    public String getUsernameCustom() { return username; }
+    // ✅ Getters/setters pour le vrai username
+    public String getUsernameField() { return username; }
     public void setUsername(String username) { this.username = username; }
 
     public String getNom() { return nom; }
@@ -62,10 +64,10 @@ public class Utilisateur implements UserDetails {
     public void setRole(Integer role) { this.role = role; }
 
     // ==== Implémentation de UserDetails ====
-
+    
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList(); // ou tu peux ajouter des rôles ici
+        return Collections.emptyList();
     }
 
     @Override
@@ -75,26 +77,18 @@ public class Utilisateur implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.email; // utilisé pour l’authentification
+        return this.email; // Pour Spring Security - utilise l'email
     }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isAccountNonExpired() { return true; }
 
     @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+    public boolean isAccountNonLocked() { return true; }
 
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() {
-        return true;
-    }
+    public boolean isEnabled() { return true; }
 }

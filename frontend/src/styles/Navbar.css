@@ -8,8 +8,18 @@
   min-height: 70px; /* ou 80px selon la taille du logo */
 }
 
+.navbar .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
   
 .navbar-logo {
+  display: flex;
+  align-items: center;
   flex: 1;
   font-size: 1.6rem;
   font-weight: bold;
@@ -181,4 +191,3 @@
     object-fit: contain;
     margin: -38px -270px; /* Ajout d'une marge négative pour compenser l'augmentation de hauteur */
   }
-  
