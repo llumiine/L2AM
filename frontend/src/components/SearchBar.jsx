@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import "../styles/SearchBar.css";
 
-const SearchBar = () => {
+const SearchBar = ({ onSearch }) => {
     const [searchValue, setSearchValue] = useState("");
     const [activeSort, setActiveSort] = useState("note");
 
-    const handleSearch = () => {
+    const handleSearch = (e) => {
+        e.preventDefault(); // Empêcher le rechargement de la page
         console.log("Recherche:", searchValue);
+        if (onSearch) {
+            onSearch(searchValue);
+        }
     };
 
     const handleSortChange = (sortType) => {
@@ -14,24 +18,32 @@ const SearchBar = () => {
         console.log("Tri sélectionné:", sortType);
     };
 
+    const handleInputChange = (e) => {
+        const value = e.target.value;
+        setSearchValue(value);
+        if (onSearch) {
+            onSearch(value); // Recherche en temps réel
+        }
+    };
+
     return (
         <div className="search-bar-container">
             {/* Barre de recherche principale */}
-            <div className="search-input-container">
+            <form onSubmit={handleSearch} className="search-input-container">
                 <input
                     type="text"
-                    placeholder="Valeur"
+                    placeholder="Rechercher un produit..."
                     className="search-input"
                     value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
+                    onChange={handleInputChange}
                 />
-                <button className="search-button" onClick={handleSearch}>
+                <button type="submit" className="search-button">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <circle cx="11" cy="11" r="8"/>
                         <path d="M21 21L16.65 16.65"/>
                     </svg>
                 </button>
-            </div>
+            </form>
 
             {/* Boutons de tri */}
             <div className="sort-buttons">

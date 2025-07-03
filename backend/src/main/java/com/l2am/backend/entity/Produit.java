@@ -1,6 +1,7 @@
 package com.l2am.backend.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -35,12 +36,12 @@ public class Produit {
     @Column(name = "image", length = 100)
     private String image;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // Changé LAZY → EAGER pour éviter les problèmes de sérialisation JSON
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_type_oeuvre", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private TypeOeuvre typeOeuvre;
 
-    // Constructeurs
     public Produit() {}
 
     public Produit(String nom, BigDecimal prix, Integer stock, TypeOeuvre typeOeuvre) {
@@ -50,7 +51,6 @@ public class Produit {
         this.typeOeuvre = typeOeuvre;
     }
 
-    // Getters et setters
     public Long getId() {
         return id;
     }
@@ -121,5 +121,17 @@ public class Produit {
 
     public void setTypeOeuvre(TypeOeuvre typeOeuvre) {
         this.typeOeuvre = typeOeuvre;
+    }
+
+    // 🎯 AJOUT CRUCIAL : Cette méthode expose l'ID du type directement en JSON
+    @JsonProperty("idTypeOeuvre")
+    public Long getIdTypeOeuvre() {
+        return typeOeuvre != null ? typeOeuvre.getIdType() : null;
+    }
+
+    // 🎁 BONUS : Expose aussi le libellé du type pour l'affichage
+    @JsonProperty("typeLibelle")
+    public String getTypeLibelle() {
+        return typeOeuvre != null ? typeOeuvre.getLibelle() : null;
     }
 }

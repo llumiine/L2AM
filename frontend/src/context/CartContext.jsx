@@ -1,38 +1,103 @@
 // src/context/CartContext.js
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const CartContext = createContext();
 
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
-    // Au lieu de throw une erreur, retourner des valeurs par défaut
     console.warn('useCart must be used within a CartProvider');
     return {
+      cartItems: [],
       cartCount: 0,
       addToCart: () => {},
-      resetCart: () => {}
+      removeFromCart: () => {},
+      updateQuantity: () => {},
+      clearCart: () => {},
+      getTotalPrice: () => 0
     };
   }
   return context;
 };
 
 export const CartProvider = ({ children }) => {
+  const [cartItems, setCartItems] = useState([]);
   const [cartCount, setCartCount] = useState(0);
 
+  // Charger le panier depuis localStorage au démarrage
+  useEffect(() => {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      try {
+        const parsedCart = JSON.parse(savedCart);
+        setCartItems(parsedCart);
+        setCartCount(parsedCart.reduce((total, item) => total + item.quantity, 0));
+      } catch (error) {
+        console.error('Erreur lors du chargement du panier:', error);
+      }
+    }
+  }, []);
+
+  // Sauvegarder le panier dans localStorage à chaque modification
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+    setCartCount(cartItems.reduce((total, item) => total + item.quantity, 0));
+  }, [cartItems]);
+
   const addToCart = (product, quantity = 1) => {
-    setCartCount(prevCount => prevCount + quantity);
+    setCartItems(prevItems => {
+      const existingItem = prevItems.find(item => item.id === product.id);
+      
+      if (existingItem) {
+        // Si le produit existe déjà, augmenter la quantité
+        return prevItems.map(item =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      } else {
+        // Sinon, ajouter le nouveau produit
+        return [...prevItems, { ...product, quantity }];
+      }
+    });
   };
 
-  const resetCart = () => {
-    setCartCount(0);
+  const removeFromCart = (productId) => {
+    setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
+  };
+
+  const updateQuantity = (productId, newQuantity) => {
+    if (newQuantity <= 0) {
+      removeFromCart(productId);
+      return;
+    }
+    
+    setCartItems(prevItems =>
+      prevItems.map(item =>
+        item.id === productId
+          ? { ...item, quantity: newQuantity }
+          : item
+      )
+    );
+  };
+
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
+  const getTotalPrice = () => {
+    return cartItems.reduce((total, item) => total + (item.prix * item.quantity), 0);
   };
 
   const value = {
+    cartItems,
     cartCount,
     addToCart,
-    resetCart
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    getTotalPrice
   };
 
   return (

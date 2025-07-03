@@ -50,7 +50,9 @@ function Layout() {
 export default function App() {
   return (
     <Router>
-      <Layout />
+      <CartProvider>
+        <Layout />
+      </CartProvider>
     </Router>
   );
 }

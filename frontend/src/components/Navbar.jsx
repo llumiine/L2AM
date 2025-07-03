@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import "../styles/Navbar.css";
 import logo from "../assets/logo.png";
+import { useCart } from "../context/CartContext";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -9,10 +10,8 @@ export default function Navbar() {
   const [user, setUser] = useState(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation(); // Pour détecter les changements de page
-  
-  // Compteur temporaire en dur (remplacez par useCart() plus tard)
-  const cartCount = 0;
+  const location = useLocation();
+  const { cartCount } = useCart();  // Utilisation du hook useCart
 
   // Vérifier l'authentification au chargement ET à chaque changement de route
   useEffect(() => {

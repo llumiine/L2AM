@@ -127,14 +127,11 @@ const PageClient = () => {
         } finally {
             setLoading(false);
         }
-    };
-
-    // Configuration des menus
+    };    // Configuration des menus - MISE À JOUR
     const menuItems = [
-        { name: 'Compte', icon: '👤', path: '/compte' },
-        { name: 'Détails', icon: '📝', path: '/details' },
-        { name: 'Adresse et Commande', icon: '📦', path: '/commandes' },
-        { name: 'Déconnexion', icon: '🚪', action: 'logout' }
+        { name: "Détails", icon: "📝" },
+        { name: "Adresse et Commande", icon: "📦" },
+        { name: "Déconnexion", icon: "🚪" },
     ];
 
     // Gestion des changements dans les inputs
@@ -219,22 +216,25 @@ const PageClient = () => {
         } finally {
             setIsLoading(false);
         }
-    };
-
-    // Gestion du clic sur les menus
-    const handleMenuClick = (menuItem) => {
-        if (menuItem.action === 'logout') {
-            if (window.confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = '/login';
-            }
-        } else if (menuItem.name === 'Adresse et Commande') {
-            // Navigation vers la page AdresseCommande
-            navigate('/adresse-commande');
-        } else {
-            setActiveMenu(menuItem.name);
-            console.log(`Navigation vers: ${menuItem.path}`);
+    };    // Gestion du clic sur les menus - MISE À JOUR
+    const handleMenuClick = (item) => {
+        setActiveMenu(item.name);
+        switch (item.name) {
+            case "Détails":
+                // Rester sur la même page
+                break;
+            case "Adresse et Commande":
+                navigate('/adresse-commande');
+                break;
+            case "Déconnexion":
+                if (window.confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/login';
+                }
+                break;
+            default:
+                break;
         }
     };
 
@@ -258,10 +258,12 @@ const PageClient = () => {
     // Affichage du loader pendant le chargement
     if (loading) {
         return (
-            <div className="page-client" style={{ 
+            <div style={{ 
                 display: 'flex', 
                 justifyContent: 'center', 
                 alignItems: 'center', 
+                minHeight: '100vh',
+                backgroundColor: '#f8f9fa',
                 fontSize: '18px'
             }}>
                 ⏳ Chargement de votre profil...
@@ -272,16 +274,28 @@ const PageClient = () => {
     // Affichage en cas d'erreur
     if (error) {
         return (
-            <div className="page-client" style={{ 
+            <div style={{ 
                 display: 'flex', 
                 flexDirection: 'column',
                 justifyContent: 'center', 
                 alignItems: 'center', 
+                minHeight: '100vh',
+                backgroundColor: '#f8f9fa',
                 color: '#e53e3e'
             }}>
                 <h2>❌ Erreur</h2>
                 <p>{error}</p>
-                <button onClick={loadUserData} className="edit-button">
+                <button onClick={loadUserData} style={{
+                    background: 'linear-gradient(135deg, #a8c4a0, #8fb085)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.8rem 1.5rem',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    marginTop: '1rem'
+                }}>
                     🔄 Réessayer
                 </button>
             </div>
@@ -291,83 +305,166 @@ const PageClient = () => {
     // Affichage si pas de données utilisateur
     if (!userData) {
         return (
-            <div className="page-client" style={{ 
+            <div style={{ 
                 display: 'flex', 
                 justifyContent: 'center', 
-                alignItems: 'center'
+                alignItems: 'center',
+                minHeight: '100vh',
+                backgroundColor: '#f8f9fa'
             }}>
                 ❌ Aucune donnée utilisateur disponible
             </div>
         );
     }
 
-    // Génération de l'image de profil par défaut
-    const defaultProfileImage = `https://ui-avatars.com/api/?name=${encodeURIComponent((userData.prenom || '') + ' ' + (userData.nom || ''))}&background=a8c4a0&color=fff&size=100`;
-
     return (
-        <div className="page-client">
-            {/* Sidebar */}
-            <div className="sidebar">
-                <div className="profile-section">
-                    <div className="profile-avatar">
-                        <img src={defaultProfileImage} alt="Profile" />
-                        <div className="profile-status">✓</div>
+        <div style={{
+            display: "flex",
+            minHeight: "100vh",
+            fontFamily: "system-ui, -apple-system, sans-serif",
+            backgroundColor: "#f8f9fa",
+        }}>
+            {/* Sidebar - NOUVELLE VERSION */}
+            <div style={{
+                width: "320px",
+                background: "linear-gradient(135deg, #a8c4a0, #8fb085)",
+                color: "white",
+                padding: "2rem",
+                boxShadow: "4px 0 20px rgba(168, 196, 160, 0.3)",
+            }}>
+                <div style={{
+                    textAlign: "center",
+                    marginBottom: "3rem",
+                }}>
+                    <div style={{
+                        width: "100px",
+                        height: "100px",
+                        margin: "0 auto 1.5rem",
+                        borderRadius: "50%",
+                        overflow: "hidden",
+                        border: "4px solid rgba(255, 255, 255, 0.3)",
+                        boxShadow: "0 8px 25px rgba(0, 0, 0, 0.2)",
+                        backgroundColor: "#a8c4a0",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}>
+                        {userData?.avatar ? (
+                            <img
+                                src={userData.avatar}
+                                alt="Profile"
+                                style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                }}
+                            />
+                        ) : (
+                            <span style={{ fontSize: "3rem", color: "white" }}>👤</span>
+                        )}
                     </div>
-                    <h3 className="profile-name">
-                        {userData.prenom} {userData.nom}
+                    <h3 style={{
+                        fontSize: "1.4rem",
+                        fontWeight: "700",
+                        color: "white",
+                        marginBottom: "0.5rem",
+                    }}>
+                        {userData?.nom && userData?.prenom
+                            ? `${userData.prenom} ${userData.nom}`
+                            : userData?.email || "Utilisateur"}
                     </h3>
-                    <p className="profile-type">
-                        {userData.role === 1 ? 'Administrateur' : 'Cliente premium'}
+                    <p style={{
+                        color: "rgba(255, 255, 255, 0.8)",
+                        fontSize: "0.9rem",
+                    }}>
+                        {userData?.role === 1 ? "Administrateur" : "Client"}
                     </p>
-                    <div className="profile-badge">
-                        🌟 Membre depuis {new Date().getFullYear()}
-                    </div>
                 </div>
 
-                <nav className="nav-menu">
+                <nav style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.8rem",
+                }}>
                     {menuItems.map((item, index) => (
                         <button
                             key={index}
                             onClick={() => handleMenuClick(item)}
-                            className={`nav-item ${activeMenu === item.name ? 'active' : ''}`}
+                            style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "1rem",
+                                padding: "1.2rem 1.5rem",
+                                background:
+                                    activeMenu === item.name
+                                        ? "rgba(255, 255, 255, 0.2)"
+                                        : "transparent",
+                                color: "white",
+                                border:
+                                    activeMenu === item.name
+                                        ? "2px solid rgba(255, 255, 255, 0.3)"
+                                        : "2px solid transparent",
+                                borderRadius: "12px",
+                                cursor: "pointer",
+                                transition: "all 0.3s ease",
+                                fontSize: "1rem",
+                                fontWeight: activeMenu === item.name ? "600" : "500",
+                                textAlign: "left",
+                            }}
+                            onMouseOver={(e) => {
+                                if (activeMenu !== item.name) {
+                                    e.target.style.background = "rgba(255, 255, 255, 0.1)";
+                                }
+                            }}
+                            onMouseOut={(e) => {
+                                if (activeMenu !== item.name) {
+                                    e.target.style.background = "transparent";
+                                }
+                            }}
                         >
-                            <span className="nav-item-icon">{item.icon}</span>
+                            <span style={{ fontSize: "1.2rem" }}>{item.icon}</span>
                             {item.name}
                         </button>
                     ))}
                 </nav>
-
-                <div className="stats-section">
-                    <h4 className="stats-title">📊 Vos informations</h4>
-                    <div className="stats-list">
-                        <div className="stats-item">
-                            <span className="stats-label">ID Utilisateur</span>
-                            <span className="stats-value">#{userData.id}</span>
-                        </div>
-                        <div className="stats-item">
-                            <span className="stats-label">Email</span>
-                            <span className="stats-value" style={{ fontSize: '0.8rem' }}>
-                                {userData.email}
-                            </span>
-                        </div>
-                        <div className="stats-item">
-                            <span className="stats-label">Statut</span>
-                            <span className="stats-value">
-                                {userData.role === 1 ? '👑 Admin' : '👤 User'}
-                            </span>
-                        </div>
-                    </div>
-                </div>
             </div>
 
-            {/* Main Content */}
-            <div className="main-content">
-                <div className="header-section">
-                    <h1 className="main-title">Mon Compte</h1>
-                    <p className="main-subtitle">Gérez vos informations personnelles</p>
+            {/* Contenu principal */}
+            <div style={{
+                flex: 1,
+                padding: "3rem",
+                maxWidth: "1000px",
+            }}>
+                <div style={{
+                    marginBottom: "3rem",
+                }}>
+                    <h1 style={{
+                        fontSize: "2.5rem",
+                        fontWeight: "700",
+                        color: "#2c3e2d",
+                        textAlign: "center",
+                        marginBottom: "0.5rem",
+                    }}>
+                        Mon Compte
+                    </h1>
+                    <p style={{
+                        textAlign: "center",
+                        color: "#7a8a77",
+                        fontSize: "1.1rem",
+                    }}>
+                        Gérez vos informations personnelles
+                    </p>
                 </div>
 
-                <div className="content-card">
+                <div style={{
+                    background: "white",
+                    borderRadius: "20px",
+                    padding: "2.5rem",
+                    boxShadow: "0 8px 30px rgba(168, 196, 160, 0.15)",
+                    border: "1px solid #e8f5e8",
+                }}>
+                    {/* Le reste de votre formulaire existant */}
                     <div className="card-header">
                         <h2 className="card-title">📝 Détails du compte</h2>
                         <button
@@ -578,11 +675,10 @@ const PageClient = () => {
                                 <div className="security-info-item">
                                     <p>🏠 Adresse complète</p>
                                     <p>
-  {userData.adresse && userData.ville && userData.codePostal
-      ? `${userData.adresse}, ${userData.codePostal} ${userData.ville}`
-      : 'Non renseignée'}
-</p>
-
+                                        {userData.adresse && userData.ville && userData.codePostal
+                                            ? `${userData.adresse}, ${userData.codePostal} ${userData.ville}`
+                                            : 'Non renseignée'}
+                                    </p>
                                 </div>
                                 <div className="security-info-item">
                                     <p>👤 Nom d'utilisateur</p>

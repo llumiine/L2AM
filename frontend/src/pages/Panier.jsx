@@ -1,53 +1,101 @@
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext'; // AJOUT
 
 const Panier = () => {
   const navigate = useNavigate();
-  const [items, setItems] = useState([
-    { 
-      id: 1, 
-      nom: "Délice rouge", 
-      prix: 15, 
-      quantite: 1, 
-      image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=120&h=120&fit=crop&crop=center" 
-    },
-    { 
-      id: 2, 
-      nom: "Souvenirs en couleur", 
-      prix: 15, 
-      quantite: 1, 
-      image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=120&h=120&fit=crop&crop=center" 
-    },
-    { 
-      id: 3, 
-      nom: "Trésor suspendu", 
-      prix: 20, 
-      quantite: 1, 
-      image: "https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=120&h=120&fit=crop&crop=center" 
-    }
-  ]);
-
+const { cartItems, cartCount, updateQuantity, removeFromCart, clearCart } = useCart();
   const [promoCode, setPromoCode] = useState("");
 
   const handleQuantiteChange = (id, type) => {
-    setItems(items.map(item =>
-      item.id === id
-        ? { ...item, quantite: type === 'add' ? item.quantite + 1 : Math.max(1, item.quantite - 1) }
-        : item
-    ));
+    const item = cartItems.find(item => item.id === id);
+    if (item) {
+      const newQuantity = type === 'add' ? item.quantity + 1 : Math.max(1, item.quantity - 1);
+      updateQuantity(id, newQuantity);
+    }
   };
 
   const handleRemove = (id) => {
-    setItems(items.filter(item => item.id !== id));
+    removeFromCart(id);
   };
 
-  const sousTotal = items.reduce((sum, item) => sum + item.prix * item.quantite, 0);
-  const fraisLivraison = 5;
+  // Calculer les totaux
+  const sousTotal = cartItems.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
+  const fraisLivraison = cartItems.length > 0 ? 5 : 0; // Pas de frais si panier vide
   const total = sousTotal + fraisLivraison;
 
   const handlePaiement = () => {
     navigate('/paiement');
   };
+
+  // Affichage si panier vide
+  if (cartItems.length === 0) {
+    return (
+      <div style={{ 
+        fontFamily: "'Inter', sans-serif", 
+        backgroundColor: '#f8f8f8', 
+        minHeight: '100vh',
+        padding: '40px 20px'
+      }}>
+        <main style={{ 
+          maxWidth: '1200px',
+          margin: '0 auto'
+        }}>
+          <h1 style={{ 
+            fontSize: '36px', 
+            fontWeight: 'bold', 
+            marginBottom: '40px',
+            color: '#2d3e2d'
+          }}>
+            Mon Panier
+          </h1>
+          
+          <div style={{
+            backgroundColor: 'white',
+            padding: '60px 40px',
+            borderRadius: '12px',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '80px', marginBottom: '20px' }}>🛒</div>
+            <h2 style={{ 
+              fontSize: '24px', 
+              fontWeight: '600', 
+              marginBottom: '15px',
+              color: '#2d3e2d'
+            }}>
+              Votre panier est vide
+            </h2>
+            <p style={{ 
+              color: '#666', 
+              marginBottom: '30px',
+              fontSize: '16px'
+            }}>
+              Ajoutez des produits à votre panier pour les voir apparaître ici.
+            </p>
+            <button
+              onClick={() => navigate('/shop')}
+              style={{
+                backgroundColor: '#a8b89a',
+                color: 'white',
+                border: 'none',
+                padding: '15px 30px',
+                borderRadius: '25px',
+                fontSize: '16px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#96a488'}
+              onMouseOut={(e) => e.target.style.backgroundColor = '#a8b89a'}
+            >
+              Continuer mes achats
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div style={{ 
@@ -60,14 +108,38 @@ const Panier = () => {
         maxWidth: '1200px',
         margin: '0 auto'
       }}>
-        <h1 style={{ 
-          fontSize: '36px', 
-          fontWeight: 'bold', 
-          marginBottom: '40px',
-          color: '#2d3e2d'
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: '40px'
         }}>
-          Mon Panier
-        </h1>
+          <h1 style={{ 
+            fontSize: '36px', 
+            fontWeight: 'bold', 
+            color: '#2d3e2d'
+          }}>
+            Mon Panier ({cartCount} article{cartCount > 1 ? 's' : ''})
+          </h1>
+          
+          {cartItems.length > 0 && (
+            <button
+              onClick={clearCart}
+              style={{
+                backgroundColor: '#ff6b6b',
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}
+            >
+              🗑️ Vider le panier
+            </button>
+          )}
+        </div>
 
         <div style={{ 
           display: 'grid', 
@@ -77,7 +149,7 @@ const Panier = () => {
         }}>
           {/* Items Section */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {items.map(item => (
+            {cartItems.map(item => (
               <div key={item.id} style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -88,7 +160,7 @@ const Panier = () => {
                 boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
               }}>
                 <img 
-                  src={item.image} 
+                  src={item.image ? `http://localhost:9090/uploads/${item.image}` : "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=120&h=120&fit=crop&crop=center"}
                   alt={item.nom}
                   style={{
                     width: '80px',
@@ -114,6 +186,15 @@ const Panier = () => {
                   }}>
                     {item.prix}€
                   </p>
+                  {item.description && (
+                    <p style={{ 
+                      fontSize: '14px', 
+                      color: '#666',
+                      marginTop: '5px'
+                    }}>
+                      {item.description.length > 50 ? item.description.substring(0, 50) + '...' : item.description}
+                    </p>
+                  )}
                 </div>
 
                 <div style={{ 
@@ -148,7 +229,7 @@ const Panier = () => {
                     minWidth: '20px', 
                     textAlign: 'center' 
                   }}>
-                    {item.quantite}
+                    {item.quantity}
                   </span>
                   <button 
                     onClick={() => handleQuantiteChange(item.id, 'add')}
@@ -168,6 +249,16 @@ const Panier = () => {
                   >
                     +
                   </button>
+                </div>
+
+                <div style={{ 
+                  fontSize: '16px', 
+                  fontWeight: '600',
+                  color: '#2d3e2d',
+                  minWidth: '60px',
+                  textAlign: 'right'
+                }}>
+                  {(item.prix * item.quantity).toFixed(2)}€
                 </div>
 
                 <button 
@@ -216,8 +307,8 @@ const Panier = () => {
                 fontSize: '16px',
                 color: '#666'
               }}>
-                <span>Sous-total</span>
-                <span style={{ fontWeight: '500' }}>{sousTotal}€</span>
+                <span>Sous-total ({cartCount} article{cartCount > 1 ? 's' : ''})</span>
+                <span style={{ fontWeight: '500' }}>{sousTotal.toFixed(2)}€</span>
               </div>
               
               <div style={{ 
@@ -227,7 +318,9 @@ const Panier = () => {
                 color: '#666'
               }}>
                 <span>Livraison</span>
-                <span style={{ fontWeight: '500' }}>{fraisLivraison}€</span>
+                <span style={{ fontWeight: '500' }}>
+                  {fraisLivraison === 0 ? 'Gratuite' : `${fraisLivraison}€`}
+                </span>
               </div>
 
               <hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '10px 0' }} />
@@ -240,7 +333,7 @@ const Panier = () => {
                 color: '#2d3e2d'
               }}>
                 <span>Total</span>
-                <span>{total}€</span>
+                <span>{total.toFixed(2)}€</span>
               </div>
             </div>
 
@@ -298,7 +391,7 @@ const Panier = () => {
               onMouseOver={(e) => e.target.style.backgroundColor = '#96a488'}
               onMouseOut={(e) => e.target.style.backgroundColor = '#a8b89a'}
             >
-              Paiement →
+              Paiement → ({total.toFixed(2)}€)
             </button>
           </div>
         </div>
