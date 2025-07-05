@@ -4,8 +4,31 @@ import { useCart } from '../context/CartContext'; // AJOUT
 
 const Panier = () => {
   const navigate = useNavigate();
-const { cartItems, cartCount, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { cartItems, cartCount, updateQuantity, removeFromCart, clearCart } = useCart();
   const [promoCode, setPromoCode] = useState("");
+
+  // Fonction pour obtenir l'URL de l'image (cohérente avec ProductPage)
+  const getImageUrl = (item) => {
+    if (!item?.image) {
+      return null;
+    }
+    // Utiliser la même logique que ProductPage
+    return `/images/${item.image}`;
+  };
+
+  // Image de fallback basée sur le type (comme dans ProductPage)
+  const getFallbackImage = (item) => {
+    if (!item) return "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=120&h=120&fit=crop&crop=center";
+    
+    const typeImages = {
+      1: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iIzNmNTFiNSIvPjx0ZXh0IHg9IjYwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkFydCBEaWdpdGFsPC90ZXh0Pjwvc3ZnPg==',
+      2: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2Y1N2MwMCIvPjx0ZXh0IHg9IjYwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkFyZ2lsZTwvdGV4dD48L3N2Zz4=',
+      3: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iIzljMjdiMCIvPjx0ZXh0IHg9IjYwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkNhbGxpZ3JhcGhpZTwvdGV4dD48L3N2Zz4='
+    };
+    
+    return typeImages[item.idTypeOeuvre] || 
+           "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=120&h=120&fit=crop&crop=center";
+  };
 
   const handleQuantiteChange = (id, type) => {
     const item = cartItems.find(item => item.id === id);
@@ -160,8 +183,12 @@ const { cartItems, cartCount, updateQuantity, removeFromCart, clearCart } = useC
                 boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
               }}>
                 <img 
-                  src={item.image ? `http://localhost:9090/uploads/${item.image}` : "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=120&h=120&fit=crop&crop=center"}
+                  src={getImageUrl(item) || getFallbackImage(item)}
                   alt={item.nom}
+                  onError={(e) => {
+                    console.log('❌ Erreur chargement image dans panier, utilisation du fallback');
+                    e.target.src = getFallbackImage(item);
+                  }}
                   style={{
                     width: '80px',
                     height: '80px',

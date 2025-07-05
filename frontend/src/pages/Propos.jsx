@@ -1,7 +1,8 @@
 import React from "react";
 import "../styles/Propos.css";
 
-const portrait = "https://i.pravatar.cc/300?img=68";
+// Nouvelle photo d'artiste plus esthétique et professionnelle
+const portrait = "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face";
 
 const Propos = () => {
   return (

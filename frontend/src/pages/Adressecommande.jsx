@@ -11,6 +11,9 @@ const AdresseCommande = () => {
     const [userData, setUserData] = useState(null);
     const [commandes, setCommandes] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [commentaire, setCommentaire] = useState("");
+const [note, setNote] = useState("");
+
 
     // Charger les données utilisateur et commandes
     useEffect(() => {
@@ -61,6 +64,37 @@ const AdresseCommande = () => {
         { name: "Adresse et Commande", active: true, icon: "📦" },
         { name: "Déconnexion", active: false, icon: "🚪" },
     ];
+    const envoyerCommentaire = async () => {
+    if (!commentaire || !note) {
+        alert("Merci de remplir le commentaire et la note !");
+        return;
+    }
+
+    try {
+        const res = await fetch("http://localhost:9090/api/commentaires", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                idUtilisateur: userData.id,
+                idProduit: 1, // ou un vrai ID si tu l’as
+                commentaire: commentaire,
+                note: Number(note)
+            })
+        });
+
+        if (!res.ok) throw new Error("Échec de l'envoi");
+
+        alert("Commentaire envoyé !");
+        setCommentaire("");
+        setNote("");
+    } catch (err) {
+        console.error(err);
+        alert("Erreur lors de l'envoi du commentaire.");
+    }
+};
+
     const handleAdresseSubmit = (e) => {
         e.preventDefault();
         if (!adresse.trim() || !ville.trim() || !codePostal.trim()) {
@@ -833,37 +867,73 @@ Détails de la commande ${commandeId}:
                                 border: "1px solid #e8f5e8",
                             }}
                         >
-                            <p
-                                style={{
-                                    color: "#7a8a77",
-                                    marginBottom: "1rem",
-                                }}
-                            >
-                                Besoin d'aide avec une commande ?
-                            </p>
-                            <button
-                                style={{
-                                    background: "none",
-                                    color: "#a8c4a0",
-                                    border: "2px solid #a8c4a0",
-                                    padding: "0.8rem 1.5rem",
-                                    borderRadius: "10px",
-                                    cursor: "pointer",
-                                    fontSize: "0.9rem",
-                                    fontWeight: "600",
-                                    transition: "all 0.3s ease",
-                                }}
-                                onMouseOver={(e) => {
-                                    e.target.style.background = "#a8c4a0";
-                                    e.target.style.color = "white";
-                                }}
-                                onMouseOut={(e) => {
-                                    e.target.style.background = "none";
-                                    e.target.style.color = "#a8c4a0";
-                                }}
-                            >
-                                📞 Contacter le support
-                            </button>
+                            
+                            {/* Formulaire de commentaire client */}
+<div
+    style={{
+        marginTop: "3rem",
+        background: "white",
+        padding: "2rem",
+        borderRadius: "12px",
+        boxShadow: "0 4px 15px rgba(168, 196, 160, 0.1)",
+        border: "1px solid #e8f5e8"
+    }}
+>
+    <h2 style={{ fontSize: "1.6rem", color: "#2c3e2d", marginBottom: "1rem" }}>
+        ✍️ Laisser un commentaire
+    </h2>
+
+    <textarea
+        value={commentaire}
+        onChange={(e) => setCommentaire(e.target.value)}
+        placeholder="Votre avis sur le site ou les produits..."
+        rows={4}
+        style={{
+            width: "100%",
+            padding: "1rem",
+            borderRadius: "10px",
+            border: "1px solid #ccc",
+            fontSize: "1rem",
+            marginBottom: "1rem"
+        }}
+    />
+
+    <select
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        style={{
+            padding: "0.6rem",
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+            fontSize: "1rem",
+            marginBottom: "1rem"
+        }}
+    >
+        <option value="">Note</option>
+        {[1, 2, 3, 4, 5].map((n) => (
+            <option key={n} value={n}>{n} ⭐</option>
+        ))}
+    </select>
+
+    <br />
+
+    <button
+        onClick={envoyerCommentaire}
+        style={{
+            background: "linear-gradient(135deg, #a8c4a0, #8fb085)",
+            color: "white",
+            border: "none",
+            padding: "0.8rem 1.5rem",
+            borderRadius: "10px",
+            cursor: "pointer",
+            fontSize: "1rem",
+            fontWeight: "600"
+        }}
+    >
+        📨 Envoyer
+    </button>
+</div>
+
                         </div>
                     </div>
                 </div>

@@ -34,11 +34,13 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/api/auth/**",
-                    "/api/produits/**",  
-                    "/api/public/**",
-                    "/error"
-                ).permitAll()
+    "/api/auth/**",
+    "/api/produits/**",
+    "/api/public/**",
+    "/api/commentaires/**",  // 👈 AJOUTE CETTE LIGNE
+    "/error"
+).permitAll()
+
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

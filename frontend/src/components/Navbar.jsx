@@ -11,23 +11,18 @@ export default function Navbar() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { cartCount } = useCart();  // Utilisation du hook useCart
+  const { cartCount } = useCart();
 
-  // Vérifier l'authentification au chargement ET à chaque changement de route
   useEffect(() => {
     checkAuthStatus();
-  }, [location]); // Ajout de location comme dépendance
+  }, [location]);
 
-  // Écouter les changements dans localStorage
   useEffect(() => {
     const handleStorageChange = () => {
       checkAuthStatus();
     };
 
-    // Écouter les changements de localStorage
     window.addEventListener('storage', handleStorageChange);
-    
-    // Vérifier périodiquement (toutes les secondes)
     const interval = setInterval(checkAuthStatus, 1000);
 
     return () => {
@@ -58,6 +53,12 @@ export default function Navbar() {
 
   const handleLogin = () => {
     navigate('/login');
+    setIsMenuOpen(false);
+  };
+
+  const handleRegister = () => {
+    navigate('/register');
+    setIsMenuOpen(false);
   };
 
   const handleLogout = () => {
@@ -66,19 +67,17 @@ export default function Navbar() {
     setIsLoggedIn(false);
     setUser(null);
     setShowUserMenu(false);
-    
-    // Forcer une vérification immédiate
+    setIsMenuOpen(false);
     setTimeout(checkAuthStatus, 100);
-    
     navigate('/');
   };
 
   const handleAccountClick = () => {
     navigate('/pageclient');
     setShowUserMenu(false);
+    setIsMenuOpen(false);
   };
 
-  // Fermer le menu utilisateur si on clique ailleurs
   useEffect(() => {
     const handleClickOutside = () => {
       if (showUserMenu) {
@@ -100,164 +99,97 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Navigation links */}
+        {/* Navigation links - Desktop seulement */}
         <div className="navbar-links">
           <Link to="/" className="nav-link">Accueil</Link>
           <Link to="/shop" className="nav-link">Boutique</Link>
           <Link to="/about" className="nav-link">À propos</Link>
           <Link to="/contact" className="nav-link">Contact</Link>
-          {!isLoggedIn && <Link to="/register" className="nav-link">Inscription</Link>}
         </div>
 
-        {/* Actions (always visible) */}
+        {/* Actions - Desktop */}
         <div className="navbar-actions">
+          {/* Barre de recherche */}
+          <input type="text" placeholder="Rechercher..." className="navbar-input" />
+          
+          {/* Panier */}
+          <Link to="/panier" className="navbar-cart">
+            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <circle cx="9" cy="21" r="1"/>
+              <circle cx="20" cy="21" r="1"/>
+              <path d="m1 1 4 4 2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            {cartCount > 0 && (
+              <span className="cart-badge">
+                {cartCount > 99 ? '99+' : cartCount}
+              </span>
+            )}
+          </Link>
+
+          {/* Boutons de connexion/inscription OU menu utilisateur */}
           {!isLoggedIn ? (
-            <button className="navbar-btn" onClick={handleLogin}>Connexion</button>
+            <div className="auth-buttons">
+              <button className="navbar-btn secondary" onClick={handleRegister}>
+                Inscription
+              </button>
+              <button className="navbar-btn primary" onClick={handleLogin}>
+                Connexion
+              </button>
+            </div>
           ) : (
-            <div style={{ position: 'relative' }}>
+            <div className="user-menu-container">
               <button 
+                className="user-avatar"
                 onClick={(e) => {
-                  e.stopPropagation(); // Empêcher la propagation du clic
+                  e.stopPropagation();
                   setShowUserMenu(!showUserMenu);
                 }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '8px',
-                  borderRadius: '50%',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#f0f0f0'}
-                onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
               >
-                {/* Avatar ou icône utilisateur */}
-                <div style={{
-                  width: '35px',
-                  height: '35px',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #a8c4a0, #8fb085)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontSize: '16px',
-                  fontWeight: 'bold'
-                }}>
+                <div className="avatar-circle">
                   {user?.nom ? user.nom.charAt(0).toUpperCase() : '👤'}
                 </div>
+                <span className="user-name">
+                  {user?.nom || 'Utilisateur'}
+                </span>
+                <svg 
+                  className={`dropdown-arrow ${showUserMenu ? 'open' : ''}`}
+                  width="16" 
+                  height="16" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  viewBox="0 0 24 24"
+                >
+                  <polyline points="6,9 12,15 18,9"></polyline>
+                </svg>
               </button>
 
               {/* Menu déroulant utilisateur */}
               {showUserMenu && (
                 <div 
-                  onClick={(e) => e.stopPropagation()} // Empêcher la fermeture du menu
-                  style={{
-                    position: 'absolute',
-                    top: '100%',
-                    right: '0',
-                    backgroundColor: 'white',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                    border: '1px solid #e8f5e8',
-                    minWidth: '200px',
-                    zIndex: 1000,
-                    marginTop: '8px'
-                  }}
+                  className="user-dropdown"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <div style={{
-                    padding: '12px 16px',
-                    borderBottom: '1px solid #f0f0f0',
-                    fontSize: '14px',
-                    color: '#666'
-                  }}>
+                  <div className="dropdown-header">
                     Bonjour, {user?.nom || 'Utilisateur'} !
                   </div>
                   
-                  <button
-                    onClick={handleAccountClick}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      background: 'none',
-                      border: 'none',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      color: '#333',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}
-                    onMouseOver={(e) => e.target.style.backgroundColor = '#f8f9fa'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
-                  >
-                    👤 Mon compte
+                  <button className="dropdown-item" onClick={handleAccountClick}>
+                    <span className="dropdown-icon">👤</span>
+                    Mon compte
                   </button>
                   
-                  <button
-                    onClick={handleLogout}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      background: 'none',
-                      border: 'none',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      color: '#e74c3c',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      borderTop: '1px solid #f0f0f0'
-                    }}
-                    onMouseOver={(e) => e.target.style.backgroundColor = '#fef2f2'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
-                  >
-                    🚪 Déconnexion
+                  <button className="dropdown-item logout" onClick={handleLogout}>
+                    <span className="dropdown-icon">🚪</span>
+                    Déconnexion
                   </button>
                 </div>
               )}
             </div>
           )}
-          
-          <input type="text" placeholder="Rechercher" className="navbar-input" />
-          
-          <Link to="/panier" className="navbar-cart" style={{ position: 'relative' }}>
-            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <circle cx="9" cy="21" r="1.5" />
-              <circle cx="19" cy="21" r="1.5" />
-              <path d="M2 2h2l3.6 9.59a2 2 0 0 0 2 1.41h7.72a2 2 0 0 0 2-1.41L22 6H6" />
-            </svg>
-            {/* Badge compteur panier temporaire */}
-            {cartCount > 0 && (
-              <span style={{
-                position: 'absolute',
-                top: '-8px',
-                right: '-8px',
-                backgroundColor: '#e74c3c',
-                color: 'white',
-                borderRadius: '50%',
-                width: '20px',
-                height: '20px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '12px',
-                fontWeight: 'bold',
-                border: '2px solid white',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-              }}>
-                {cartCount > 99 ? '99+' : cartCount}
-              </span>
-            )}
-          </Link>
         </div>
 
-        {/* Mobile menu button */}
+        {/* Bouton hamburger - Mobile seulement */}
         <button
           className={`hamburger-button ${isMenuOpen ? 'open' : ''}`}
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -269,42 +201,77 @@ export default function Navbar() {
           </div>
         </button>
 
-        {/* Mobile menu */}
-        <div className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>
-          <Link to="/" className="nav-link">Accueil</Link>
-          <Link to="/shop" className="nav-link">Boutique</Link>
-          <Link to="/about" className="nav-link">À propos</Link>
-          <Link to="/contact" className="nav-link">Contact</Link>
-          
+        {/* Menu mobile */}
+        <div className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>          <div className="mobile-header">
+            <h3>Menu</h3>
+          </div>
+
+          <div className="mobile-nav">
+            <Link to="/" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
+              🏠 Accueil
+            </Link>
+            <Link to="/shop" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
+              🛍️ Boutique
+            </Link>
+            <Link to="/about" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
+              ℹ️ À propos
+            </Link>
+            <Link to="/contact" className="mobile-link" onClick={() => setIsMenuOpen(false)}>
+              📞 Contact
+            </Link>
+          </div>
+
+          <div className="mobile-divider"></div>
+
+          <div className="mobile-search">
+            <input type="text" placeholder="Rechercher..." className="mobile-search-input" />
+          </div>
+
+          <div className="mobile-divider"></div>
+
           {!isLoggedIn ? (
-            <>
-              <Link to="/register" className="nav-link">Inscription</Link>
-              <Link to="/login" className="nav-link">Connexion</Link>
-            </>
+            <div className="mobile-auth">
+              <button className="mobile-btn secondary" onClick={handleRegister}>
+                📝 Inscription
+              </button>
+              <button className="mobile-btn primary" onClick={handleLogin}>
+                🔑 Connexion
+              </button>
+            </div>
           ) : (
-            <>
-              <Link to="/pageclient" className="nav-link">👤 Mon compte</Link>
-              <button 
-                onClick={handleLogout}
-                className="nav-link"
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: '#e74c3c',
-                  width: '100%',
-                  textAlign: 'left'
-                }}
-              >
+            <div className="mobile-user">
+              <div className="mobile-user-info">
+                <div className="mobile-avatar">
+                  {user?.nom ? user.nom.charAt(0).toUpperCase() : '👤'}
+                </div>
+                <span>Connecté en tant que {user?.nom}</span>
+              </div>
+              <button className="mobile-link" onClick={handleAccountClick}>
+                👤 Mon compte
+              </button>
+              <button className="mobile-link logout" onClick={handleLogout}>
                 🚪 Déconnexion
               </button>
-            </>
+            </div>
           )}
-          
-          <Link to="/panier" className="nav-link">
-            Panier {cartCount > 0 && `(${cartCount})`}
+
+          <div className="mobile-divider"></div>
+
+          <Link to="/panier" className="mobile-cart" onClick={() => setIsMenuOpen(false)}>
+            <span>🛒 Panier</span>
+            {cartCount > 0 && (
+              <span className="mobile-cart-badge">{cartCount}</span>
+            )}
           </Link>
         </div>
+
+        {/* Overlay pour fermer le menu mobile */}
+        {isMenuOpen && (
+          <div 
+            className="mobile-overlay"
+            onClick={() => setIsMenuOpen(false)}
+          ></div>
+        )}
       </div>
     </nav>
   );

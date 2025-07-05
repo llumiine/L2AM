@@ -8,35 +8,15 @@ import java.util.List;
 
 @Repository
 public interface CommentaireMongoRepository extends MongoRepository<CommentaireMongo, String> {
+      List<CommentaireMongo> findByIdUtilisateur(Long idUtilisateur);
     
-    /**
-     * Trouver commentaires par utilisateur
-     */
-    List<CommentaireMongo> findByIdUtilisateur(Long idUtilisateur);
-    
-    /**
-     * Trouver commentaires par produit
-     */
     List<CommentaireMongo> findByIdProduit(Long idProduit);
     
-    /**
-     * Trouver commentaires par note
-     */
     List<CommentaireMongo> findByNote(Integer note);
     
-    /**
-     * Trouver commentaires par note supérieure à
-     */
     List<CommentaireMongo> findByNoteGreaterThan(Integer note);
     
-    /**
-     * Compter commentaires par produit
-     */
     Long countByIdProduit(Long idProduit);
-    
-    /**
-     * Recherche dans le texte du commentaire
-     */
     @Query("{'commentaire': {$regex: ?0, $options: 'i'}}")
     List<CommentaireMongo> rechercherDansCommentaire(String terme);
 }

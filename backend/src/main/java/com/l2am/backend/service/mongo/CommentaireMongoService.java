@@ -38,4 +38,28 @@ public class CommentaireMongoService {
             return commentaireMongoRepository.save(updatedCommentaire);
         });
     }
+    public List<CommentaireMongo> getCommentairesByUtilisateur(Long idUtilisateur) {
+    return commentaireMongoRepository.findByIdUtilisateur(idUtilisateur);
+}
+
+public List<CommentaireMongo> getCommentairesByProduit(Long idProduit) {
+    return commentaireMongoRepository.findByIdProduit(idProduit);
+}
+
+public List<CommentaireMongo> getCommentairesByNote(Integer note) {
+    return commentaireMongoRepository.findByNote(note);
+}
+
+public List<CommentaireMongo> getCommentairesByNoteSuperieure(Integer note) {
+    return commentaireMongoRepository.findByNoteGreaterThan(note);
+}
+
+public List<CommentaireMongo> rechercherDansCommentaire(String terme) {
+    return commentaireMongoRepository.rechercherDansCommentaire(terme);
+}
+
+public Long countCommentairesByProduit(Long idProduit) {
+    return commentaireMongoRepository.countByIdProduit(idProduit);
+}
+
 }
