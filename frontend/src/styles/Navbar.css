@@ -26,7 +26,7 @@
 }
 
 .navbar-logo-img {
-  height: 50px;
+  height: 120px;
   width: auto;
   object-fit: contain;
   max-width: 150px;
@@ -617,7 +617,7 @@
   }
   
   .navbar-logo-img {
-    height: 40px;
+    height: 100px;
     max-width: 120px;
   }
   
