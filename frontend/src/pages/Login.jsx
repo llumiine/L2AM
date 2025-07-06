@@ -7,6 +7,7 @@ import cakeImg from "../assets/fraise.png";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [mdp, setMdp] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -18,13 +19,12 @@ const Login = () => {
         mdp,
       });
 
-      // Stockage du token et des infos utilisateur
       localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.utilisateur));      console.log("Connexion réussie :", response.data);
+      localStorage.setItem("user", JSON.stringify(response.data.utilisateur));
+      console.log("Connexion réussie :", response.data);
       alert("Connexion réussie !");
 
-      // Redirection après connexion réussie
-navigate("/pageclient");
+      navigate("/pageclient");
     } catch (error) {
       console.error("Erreur de connexion :", error.response);
       alert(error.response?.data || "Email ou mot de passe incorrect.");
@@ -51,13 +51,22 @@ navigate("/pageclient");
           </label>
           <label>
             Mot de passe
-            <input
-              type="password"
-              value={mdp}
-              onChange={(e) => setMdp(e.target.value)}
-              required
-              placeholder="Votre mot de passe"
-            />
+            <div className="password-field">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={mdp}
+                onChange={(e) => setMdp(e.target.value)}
+                required
+                placeholder="Votre mot de passe"
+                className="password-input"
+              />
+              <span
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? "👁️" : "👁️‍🗨️"}
+              </span>
+            </div>
           </label>
           <div className="login-forgot">
             <a href="#">Mot de passe oublié ?</a>
@@ -65,7 +74,8 @@ navigate("/pageclient");
           <button type="submit">Connexion</button>
         </form>
         <p className="login-register">
-          Tu n'as pas de compte ? <Link to="/register">Inscris-toi maintenant</Link>
+          Tu n'as pas de compte ?{" "}
+          <Link to="/register">Inscris-toi maintenant</Link>
         </p>
       </div>
     </div>

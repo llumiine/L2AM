@@ -28,6 +28,8 @@ const PageClient = () => {
     const [showPasswordSection, setShowPasswordSection] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [showOldPassword, setShowOldPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
 
     // Configuration API
     const API_BASE_URL = 'http://localhost:9090/api';
@@ -146,77 +148,134 @@ const PageClient = () => {
     // Validation du formulaire
     const validateForm = () => {
         const errors = [];
-        
-        if (!formData.nom.trim()) errors.push('Le nom est requis');
-        if (!formData.prenom.trim()) errors.push('Le prénom est requis');
-        if (!formData.email.trim()) errors.push('L\'email est requis');
-        if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
-            errors.push('L\'email n\'est pas valide');
+        if (!formData.nom) errors.push('Le nom est requis');
+        if (!formData.prenom) errors.push('Le prénom est requis');
+        if (!formData.email) errors.push('L\'email est requis');
+        if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) errors.push('Email invalide');
+        if (showPasswordSection && formData.nouveauMotDePasse && formData.nouveauMotDePasse.length < 8) {
+            errors.push('Le nouveau mot de passe doit contenir au moins 8 caractères');
         }
-        
-        if (showPasswordSection && formData.nouveauMotDePasse) {
-            if (!formData.ancienMotDePasse) {
-                errors.push('L\'ancien mot de passe est requis');
-            }
-            if (formData.nouveauMotDePasse.length < 8) {
-                errors.push('Le nouveau mot de passe doit contenir au moins 8 caractères');
-            }
-        }
-        
         return errors;
     };
 
-    // Soumission du formulaire
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        const errors = validateForm();
-        if (errors.length > 0) {
-            alert('Erreurs de validation:\n' + errors.join('\n'));
-            return;
-        }
+    // Remplacez votre fonction handleSubmit par celle-ci :
 
-        setIsLoading(true);
-        
-        try {
-            const updateData = {
-                nom: formData.nom,
-                prenom: formData.prenom,
-                email: formData.email,
-                username: formData.username,
-                adresse: formData.adresse,
-                ville: formData.ville,
-                codePostal: formData.codePostal
-            };
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    const errors = validateForm();
+    if (errors.length > 0) {
+        alert('Erreurs de validation:\n' + errors.join('\n'));
+        return;
+    }
 
-            if (showPasswordSection && formData.nouveauMotDePasse) {
-                updateData.mdp = formData.nouveauMotDePasse;
+    setIsLoading(true);
+    
+    try {
+        // 1. Si l'utilisateur veut changer son mot de passe, le faire en premier
+        if (showPasswordSection && formData.nouveauMotDePasse) {
+            try {
+                await apiCall('/utilisateurs/changer-mot-de-passe', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        ancienMotDePasse: formData.ancienMotDePasse,
+                        nouveauMotDePasse: formData.nouveauMotDePasse
+                    })
+                });
+                
+                console.log('Mot de passe modifié avec succès');
+            } catch (passwordError) {
+                // Gestion des erreurs spécifiques au mot de passe
+                console.error('Erreur changement mot de passe:', passwordError);
+                let errorMessage = 'Erreur lors du changement de mot de passe';
+                
+                if (passwordError.message.includes('400') || passwordError.message.includes('incorrect')) {
+                    errorMessage = 'L\'ancien mot de passe est incorrect';
+                } else if (passwordError.message.includes('8 caractères')) {
+                    errorMessage = 'Le nouveau mot de passe doit contenir au moins 8 caractères';
+                }
+                
+                throw new Error(errorMessage);
             }
-
-            const updatedUser = await apiCall(`/utilisateurs/${userData.id}`, {
-                method: 'PUT',
-                body: JSON.stringify(updateData)
-            });
-            
-            setUserData(updatedUser);
-            localStorage.setItem('user', JSON.stringify(updatedUser));
-            
-            alert('Informations mises à jour avec succès !');
-            setIsEditing(false);
-            setShowPasswordSection(false);
-            setFormData(prev => ({
-                ...prev,
-                ancienMotDePasse: '',
-                nouveauMotDePasse: ''
-            }));
-            
-        } catch (error) {
-            console.error('Erreur lors de la mise à jour:', error);
-            alert('Erreur lors de la mise à jour. Veuillez réessayer.');
-        } finally {
-            setIsLoading(false);
         }
-    };    // Gestion du clic sur les menus - MISE À JOUR
+
+        // 2. Mettre à jour les autres informations (nom, prénom, etc.)
+        const updateData = {
+            nom: formData.nom,
+            prenom: formData.prenom,
+            email: formData.email,
+            username: formData.username,
+            adresse: formData.adresse,
+            ville: formData.ville,
+            codePostal: formData.codePostal
+        };
+
+        const updatedUser = await apiCall(`/utilisateurs/${userData.id}`, {
+            method: 'PUT',
+            body: JSON.stringify(updateData)
+        });
+        
+        setUserData(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        // 3. Message de succès et nettoyage
+        const successMessage = showPasswordSection && formData.nouveauMotDePasse 
+            ? 'Informations et mot de passe mis à jour avec succès !' 
+            : 'Informations mises à jour avec succès !';
+            
+        alert(successMessage);
+        setIsEditing(false);
+        setShowPasswordSection(false);
+        setFormData(prev => ({
+            ...prev,
+            ancienMotDePasse: '',
+            nouveauMotDePasse: ''
+        }));
+        
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour:', error);
+        alert(error.message || 'Erreur lors de la mise à jour. Veuillez réessayer.');
+    } finally {
+        setIsLoading(false);
+    }
+};
+
+
+// Ajouter après les autres fonctions et avant le return
+const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.ancienMotDePasse || !formData.nouveauMotDePasse) {
+        alert('Veuillez remplir tous les champs');
+        return;
+    }
+
+    setIsLoading(true);
+    try {
+        await apiCall('/utilisateurs/changer-mot-de-passe', {
+            method: 'POST',
+            body: JSON.stringify({
+                ancienMotDePasse: formData.ancienMotDePasse,
+                nouveauMotDePasse: formData.nouveauMotDePasse
+            })
+        });
+
+        alert('Mot de passe modifié avec succès !');
+        setFormData(prev => ({
+            ...prev,
+            ancienMotDePasse: '',
+            nouveauMotDePasse: ''
+        }));
+        setShowPasswordSection(false);
+    } catch (error) {
+        alert('Erreur lors de la modification du mot de passe : ' + 
+              (error.message || 'Veuillez réessayer'));
+    } finally {
+        setIsLoading(false);
+    }
+};
+    
+   // Gestion du clic sur les menus - MISE À JOUR
     const handleMenuClick = (item) => {
         setActiveMenu(item.name);
         switch (item.name) {
@@ -600,36 +659,66 @@ const PageClient = () => {
 
                             {showPasswordSection && (
                                 <div className="password-section">
-                                    <div className="form-group">
-                                        <label className="form-label">
-                                            Ancien mot de passe
-                                        </label>
-                                        <input
-                                            type="password"
-                                            name="ancienMotDePasse"
-                                            value={formData.ancienMotDePasse}
-                                            onChange={handleInputChange}
-                                            placeholder="Saisissez votre mot de passe actuel"
-                                            className="form-input security-input"
-                                        />
-                                    </div>
+                                    <form onSubmit={handlePasswordChange}>
+                                        <div className="form-group">
+                                            <label className="form-label">
+                                                Ancien mot de passe
+                                            </label>
+                                            <div className="password-input-wrapper">
+                                                <input
+                                                    type={showOldPassword ? "text" : "password"}
+                                                    name="ancienMotDePasse"
+                                                    value={formData.ancienMotDePasse}
+                                                    onChange={handleInputChange}
+                                                    placeholder="Saisissez votre mot de passe actuel"
+                                                    className="form-input security-input"
+                                                    required
+                                                />
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => setShowOldPassword(!showOldPassword)}
+                                                    className="password-toggle-btn"
+                                                >
+                                                    {showOldPassword ? "👁️" : "👁️‍🗨️"}
+                                                </button>
+                                            </div>
+                                        </div>
 
-                                    <div className="form-group">
-                                        <label className="form-label">
-                                            Nouveau mot de passe
-                                        </label>
-                                        <input
-                                            type="password"
-                                            name="nouveauMotDePasse"
-                                            value={formData.nouveauMotDePasse}
-                                            onChange={handleInputChange}
-                                            placeholder="Minimum 8 caractères"
-                                            className="form-input security-input"
-                                        />
-                                        <p className="password-hint">
-                                            💡 Utilisez au moins 8 caractères avec des lettres, chiffres et symboles
-                                        </p>
-                                    </div>
+                                        <div className="form-group">
+                                            <label className="form-label">
+                                                Nouveau mot de passe
+                                            </label>
+                                            <div className="password-input-wrapper">
+                                                <input
+                                                    type={showNewPassword ? "text" : "password"}
+                                                    name="nouveauMotDePasse"
+                                                    value={formData.nouveauMotDePasse}
+                                                    onChange={handleInputChange}
+                                                    placeholder="Minimum 8 caractères"
+                                                    className="form-input security-input"
+                                                    required
+                                                    minLength={8}
+                                                />
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => setShowNewPassword(!showNewPassword)}
+                                                    className="password-toggle-btn"
+                                                >
+                                                    {showNewPassword ? "👁️" : "👁️‍🗨️"}
+                                                </button>
+                                            </div>
+                                            <p className="password-hint">
+                                                💡 Utilisez au moins 8 caractères
+                                            </p>
+                                            <button
+                                                type="submit"
+                                                className="validate-password-btn"
+                                                disabled={isLoading}
+                                            >
+                                                {isLoading ? "⏳ Modification..." : "🔄 Modifier le mot de passe"}
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
                             )}
                         </div>

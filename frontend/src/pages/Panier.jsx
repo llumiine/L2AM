@@ -7,16 +7,13 @@ const Panier = () => {
   const { cartItems, cartCount, updateQuantity, removeFromCart, clearCart } = useCart();
   const [promoCode, setPromoCode] = useState("");
 
-  // Fonction pour obtenir l'URL de l'image (cohérente avec ProductPage)
   const getImageUrl = (item) => {
     if (!item?.image) {
       return null;
     }
-    // Utiliser la même logique que ProductPage
     return `/images/${item.image}`;
   };
 
-  // Image de fallback basée sur le type (comme dans ProductPage)
   const getFallbackImage = (item) => {
     if (!item) return "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=120&h=120&fit=crop&crop=center";
     
@@ -42,16 +39,14 @@ const Panier = () => {
     removeFromCart(id);
   };
 
-  // Calculer les totaux
   const sousTotal = cartItems.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
-  const fraisLivraison = cartItems.length > 0 ? 5 : 0; // Pas de frais si panier vide
+  const fraisLivraison = cartItems.length > 0 ? 5 : 0; 
   const total = sousTotal + fraisLivraison;
 
   const handlePaiement = () => {
     navigate('/paiement');
   };
 
-  // Affichage si panier vide
   if (cartItems.length === 0) {
     return (
       <div style={{ 
@@ -170,7 +165,6 @@ const Panier = () => {
           gap: '40px',
           alignItems: 'start'
         }}>
-          {/* Items Section */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {cartItems.map(item => (
               <div key={item.id} style={{
@@ -186,7 +180,7 @@ const Panier = () => {
                   src={getImageUrl(item) || getFallbackImage(item)}
                   alt={item.nom}
                   onError={(e) => {
-                    console.log('❌ Erreur chargement image dans panier, utilisation du fallback');
+                    console.log('Erreur chargement image dans panier, utilisation du fallback');
                     e.target.src = getFallbackImage(item);
                   }}
                   style={{
@@ -310,7 +304,6 @@ const Panier = () => {
             ))}
           </div>
 
-          {/* Summary Section */}
           <div style={{
             backgroundColor: 'white',
             padding: '30px',
