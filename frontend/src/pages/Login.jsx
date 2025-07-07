@@ -19,15 +19,24 @@ const Login = () => {
         mdp,
       });
 
+      const utilisateur = response.data.utilisateur;
+      
+      // Stockage des données
       localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.utilisateur));
-      console.log("Connexion réussie :", response.data);
-      alert("Connexion réussie !");
+      localStorage.setItem("user", JSON.stringify(utilisateur));
+      
+      // Vérification du rôle (0 = user, 1 = admin)
+      if (utilisateur.role === 1) {
+        console.log("Connexion admin réussie");
+        navigate("/gestionadmin");
+      } else {
+        console.log("Connexion utilisateur réussie");
+        navigate("/pageclient");
+      }
 
-      navigate("/pageclient");
     } catch (error) {
-      console.error("Erreur de connexion :", error.response);
-      alert(error.response?.data || "Email ou mot de passe incorrect.");
+      console.error("Erreur de connexion :", error);
+      alert("Email ou mot de passe incorrect");
     }
   };
 

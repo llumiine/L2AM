@@ -590,6 +590,13 @@
   z-index: 99;
   backdrop-filter: blur(2px);
 }
+
+/* ===== CART ICON STATE ===== */
+.cart-icon.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ===== RESPONSIVE AVEC MOBILE ===== */
 @media (max-width: 768px) {
   .navbar-links {

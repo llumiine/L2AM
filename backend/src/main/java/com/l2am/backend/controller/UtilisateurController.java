@@ -23,8 +23,6 @@ public class UtilisateurController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-  
-
     @GetMapping
     public ResponseEntity<List<Utilisateur>> getAllUtilisateurs() {
         return ResponseEntity.ok(utilisateurService.listerTous());
@@ -73,13 +71,11 @@ public class UtilisateurController {
                           .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ NOUVEAU: Endpoint pour changer le mot de passe
     @PostMapping("/changer-mot-de-passe")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<String> changerMotDePasse(@RequestBody ChangePasswordRequest request, 
                                                     Authentication authentication) {
         try {
-            // Récupérer l'utilisateur connecté
             String email = authentication.getName();
             Optional<Utilisateur> optionalUser = utilisateurService.trouverParEmail(email);
             
@@ -89,22 +85,18 @@ public class UtilisateurController {
             
             Utilisateur utilisateur = optionalUser.get();
             
-            // Vérifier l'ancien mot de passe
             if (!passwordEncoder.matches(request.getAncienMotDePasse(), utilisateur.getMdp())) {
                 return ResponseEntity.badRequest().body("L'ancien mot de passe est incorrect");
             }
             
-            // Valider le nouveau mot de passe
             if (request.getNouveauMotDePasse() == null || request.getNouveauMotDePasse().length() < 8) {
                 return ResponseEntity.badRequest().body("Le nouveau mot de passe doit contenir au moins 8 caractères");
             }
             
-            // Vérifier que le nouveau mot de passe est différent de l'ancien
             if (passwordEncoder.matches(request.getNouveauMotDePasse(), utilisateur.getMdp())) {
                 return ResponseEntity.badRequest().body("Le nouveau mot de passe doit être différent de l'ancien");
             }
             
-            // Encoder et sauvegarder le nouveau mot de passe
             utilisateur.setMdp(passwordEncoder.encode(request.getNouveauMotDePasse()));
             utilisateurService.mettreAJour(utilisateur);
             
@@ -117,12 +109,10 @@ public class UtilisateurController {
         }
     }
 
-    // ✅ Classe DTO pour la demande de changement de mot de passe
     public static class ChangePasswordRequest {
         private String ancienMotDePasse;
         private String nouveauMotDePasse;
         
-        // Constructeurs
         public ChangePasswordRequest() {}
         
         public ChangePasswordRequest(String ancienMotDePasse, String nouveauMotDePasse) {
@@ -130,7 +120,6 @@ public class UtilisateurController {
             this.nouveauMotDePasse = nouveauMotDePasse;
         }
         
-        // Getters et Setters
         public String getAncienMotDePasse() {
             return ancienMotDePasse;
         }

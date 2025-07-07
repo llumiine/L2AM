@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -15,8 +15,9 @@ import AdresseCommande from "./pages/Adressecommande";
 import PaiementConfirmer from "./pages/Paiementconfirmer";
 import Admin from "./pages/Admin";
 import { CartProvider } from './context/CartContext'; // IMPORTANT : Ajoutez cette ligne
-
 import Gestionadmin from "./pages/Gestionadmin";
+import AdminRoute from "./components/AdminRoute";
+import UserRoute from "./components/UserRoute";
 
 
 function Layout() {
@@ -24,23 +25,46 @@ function Layout() {
     <div className="font-sans text-gray-800">
       <Navbar />
       <Routes>
+        {/* Routes publiques */}
         <Route path="/" element={<Home />} />
-        <Route path="/shop" element={<Shop />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Inscription />} />
-        <Route path="/product/:id" element={<ProductPage />} />
-        <Route path="/about" element={<Propos />} /> {/* Vérifiez que cette route existe */}
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/about" element={<Propos />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/panier" element={<Panier />} /> {/* Ajoutez cette route */}
-        <Route path="/paiement" element={<Paiement />} /> {/* Ajoutez cette route */}
-<Route path="/Pageclient" element={<PageClient />} /> 
-<Route path="/client" element={<PageClient />} />
-       <Route path="/adresse-commande" element={<AdresseCommande />} />
-        <Route path="/paiement-confirmer" element={<PaiementConfirmer />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/Gestion-admin" element={<Gestionadmin />} />
         <Route path="/product/:id" element={<ProductPage />} />
 
+        {/* Routes administrateur */}
+        <Route path="/admin" element={
+          <AdminRoute>
+            <Admin />
+          </AdminRoute>
+        } />
+        <Route path="/gestionadmin" element={
+          <AdminRoute>
+            <Gestionadmin />
+          </AdminRoute>
+        } />
+
+        {/* Routes utilisateur */}
+        <Route path="/pageclient" element={
+          <UserRoute>
+            <PageClient />
+          </UserRoute>
+        } />
+        <Route path="/panier" element={
+          <UserRoute>
+            <Panier />
+          </UserRoute>
+        } />
+        <Route path="/adresse-commande" element={
+          <UserRoute>
+            <AdresseCommande />
+          </UserRoute>
+        } />
+
+        {/* Redirection par défaut */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
     </div>

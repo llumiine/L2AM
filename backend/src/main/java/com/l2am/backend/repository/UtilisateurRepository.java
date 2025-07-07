@@ -11,50 +11,27 @@ import java.util.List;
 @Repository
 public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> {
     
-    // Méthodes automatiques héritées de JpaRepository :
-    // save(), findAll(), findById(), deleteById(), etc.
-    
-    // Méthodes personnalisées pour votre e-commerce :
-    
-    /**
-     * Trouver un utilisateur par email (pour la connexion)
-     */
+ 
     Optional<Utilisateur> findByEmail(String email);
     
-    /**
-     * Trouver un utilisateur par username
-     */
-    Optional<Utilisateur> findByUsername(String username);
     
-    /**
-     * Vérifier si un email existe déjà (pour l'inscription)
-     */
+    Optional<Utilisateur> findByUsername(String username);
+ 
     boolean existsByEmail(String email);
     
-    /**
-     * Vérifier si un username existe déjà
-     */
+   
     boolean existsByUsername(String username);
     
-    /**
-     * Trouver tous les utilisateurs par rôle (0 = client, 1 = admin)
-     */
+   
     List<Utilisateur> findByRole(Integer role);
-    
-    /**
-     * Trouver utilisateurs par ville (pour les statistiques)
-     */
+   
     List<Utilisateur> findByVille(String ville);
     
-    /**
-     * Requête personnalisée : chercher par nom ou prénom
-     */
-    @Query("SELECT u FROM Utilisateur u WHERE u.nom LIKE %:terme% OR u.prenom LIKE %:terme%")
-    List<Utilisateur> rechercherParNomOuPrenom(@Param("terme") String terme);
+   
+    @Query("SELECT u FROM Utilisateur u WHERE LOWER(u.nom) LIKE LOWER(CONCAT('%', :motCle, '%')) OR LOWER(u.prenom) LIKE LOWER(CONCAT('%', :motCle, '%'))")
+    List<Utilisateur> rechercherParNomOuPrenom(@Param("motCle") String motCle);
     
-    /**
-     * Compter le nombre de clients (role = 0)
-     */
-    @Query("SELECT COUNT(u) FROM Utilisateur u WHERE u.role = 0")
+  
+    @Query("SELECT COUNT(u) FROM Utilisateur u WHERE u.role = 2")
     Long compterClients();
 }

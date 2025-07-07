@@ -36,15 +36,9 @@ export default function Navbar() {
     const userData = localStorage.getItem('user');
     
     if (token && userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setIsLoggedIn(true);
-        setUser(parsedUser);
-      } catch (error) {
-        console.error('Erreur parsing user data:', error);
-        setIsLoggedIn(false);
-        setUser(null);
-      }
+      const user = JSON.parse(userData);
+      setIsLoggedIn(true);
+      setUser(user);
     } else {
       setIsLoggedIn(false);
       setUser(null);
@@ -73,9 +67,33 @@ export default function Navbar() {
   };
 
   const handleAccountClick = () => {
-    navigate('/pageclient');
-    setShowUserMenu(false);
-    setIsMenuOpen(false);
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) {
+      // Redirection selon le rôle
+      if (user.role === 1) {
+        navigate('/gestionadmin');
+      } else {
+        navigate('/pageclient');
+      }
+    } else {
+      navigate('/login');
+    }
+    setShowUserMenu(false); // Fermer le menu déroulant
+  };
+
+  const handleCartClick = (e) => {
+    e.preventDefault();
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    if (user) {
+      if (user.role === 1) {
+        alert("Les administrateurs n'ont pas accès au panier");
+        return;
+      }
+      navigate('/panier');
+    } else {
+      navigate('/login');
+    }
   };
 
   useEffect(() => {
@@ -99,7 +117,6 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Navigation links - Desktop seulement */}
         <div className="navbar-links">
           <Link to="/" className="nav-link">Accueil</Link>
           <Link to="/shop" className="nav-link">Boutique</Link>
@@ -107,13 +124,11 @@ export default function Navbar() {
           <Link to="/contact" className="nav-link">Contact</Link>
         </div>
 
-        {/* Actions - Desktop */}
         <div className="navbar-actions">
-          {/* Barre de recherche */}
           <input type="text" placeholder="Rechercher..." className="navbar-input" />
           
           {/* Panier */}
-          <Link to="/panier" className="navbar-cart">
+          <Link to="#" onClick={handleCartClick} className="navbar-cart">
             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <circle cx="9" cy="21" r="1"/>
               <circle cx="20" cy="21" r="1"/>
@@ -126,7 +141,6 @@ export default function Navbar() {
             )}
           </Link>
 
-          {/* Boutons de connexion/inscription OU menu utilisateur */}
           {!isLoggedIn ? (
             <div className="auth-buttons">
               <button className="navbar-btn secondary" onClick={handleRegister}>
@@ -164,7 +178,6 @@ export default function Navbar() {
                 </svg>
               </button>
 
-              {/* Menu déroulant utilisateur */}
               {showUserMenu && (
                 <div 
                   className="user-dropdown"
@@ -189,7 +202,6 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Bouton hamburger - Mobile seulement */}
         <button
           className={`hamburger-button ${isMenuOpen ? 'open' : ''}`}
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -201,7 +213,6 @@ export default function Navbar() {
           </div>
         </button>
 
-        {/* Menu mobile */}
         <div className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>          <div className="mobile-header">
             <h3>Menu</h3>
           </div>
@@ -257,7 +268,7 @@ export default function Navbar() {
 
           <div className="mobile-divider"></div>
 
-          <Link to="/panier" className="mobile-cart" onClick={() => setIsMenuOpen(false)}>
+          <Link to="#" onClick={handleCartClick} className="mobile-cart">
             <span>🛒 Panier</span>
             {cartCount > 0 && (
               <span className="mobile-cart-badge">{cartCount}</span>
@@ -265,7 +276,6 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Overlay pour fermer le menu mobile */}
         {isMenuOpen && (
           <div 
             className="mobile-overlay"
