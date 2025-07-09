@@ -5,27 +5,27 @@ const Gestionadmin = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    
+
     // États existants
     const [showAddForm, setShowAddForm] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
     const [showProductDetails, setShowProductDetails] = useState(null);
     const [newProduct, setNewProduct] = useState({
-        nom: '',  // Changé de name
-        categorie: '',  // Changé de category
-        prix: '',  // Changé de price
+        nom: '',
+        categorie: '',
+        prix: '',
         stock: 0,
         description: '',
-        materiaux: '',  // Changé de materials
         dimensions: '',
-        poids: '',  // Changé de weight
-        imageUrl: '',
-        typeLibelle: '' // Ajouté pour le type de produit
+        image: '',
+        taille: '',
+        couleur: '',
+        typeLibelle: ''
     });
 
     const [categories, setCategories] = useState([]);
 
-    // Récupération des produits
+
     useEffect(() => {
         fetchProducts();
         fetchCategories();
@@ -57,46 +57,66 @@ const Gestionadmin = () => {
     const fetchCategories = async () => {
         try {
             const token = localStorage.getItem("token");
-            const response = await axios.get("http://localhost:9090/api/categories", {
+            const response = await axios.get("http://localhost:9090/api/types", {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
+            console.log("Réponse API types :", response.data);
             setCategories(response.data);
         } catch (err) {
-            console.error("Erreur lors du chargement des catégories:", err);
-            // Optionnel : setCategories([]) ou valeurs par défaut
+            console.error("Erreur lors du chargement des types d'oeuvre:", err);
         }
     };
 
-    // Ajout d'un produit
     const handleAddProduct = async () => {
         try {
-            const productData = {
-                nom: newProduct.nom,
-                categorie: newProduct.categorie,
-                prix: parseFloat(newProduct.prix),
-                stock: parseInt(newProduct.stock),
-                description: newProduct.description,
-                imageUrl: newProduct.imageUrl,
-                materiaux: newProduct.materiaux.split(',').map(m => m.trim()),
-                dimensions: newProduct.dimensions,
-                poids: newProduct.poids,
-                typeLibelle: newProduct.typeLibelle
-            };
-
-            await axios.post('http://localhost:9090/api/produits', productData);
+            let formData;
+            if (newProduct.file) {
+                formData = new FormData();
+                formData.append('file', newProduct.file);
+                formData.append('nom', newProduct.nom);
+                formData.append('categorie', newProduct.categorie);
+                formData.append('prix', parseFloat(newProduct.prix));
+                formData.append('stock', parseInt(newProduct.stock));
+                formData.append('description', newProduct.description);
+                formData.append('dimensions', newProduct.dimensions);
+                formData.append('typeLibelle', newProduct.typeLibelle);
+                const token = localStorage.getItem("token");
+                await axios.post('http://localhost:9090/api/produits', formData, {
+                    headers: { 
+                        'Content-Type': 'multipart/form-data',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+            } else {
+                const productData = {
+                    nom: newProduct.nom,
+                    categorie: newProduct.categorie,
+                    prix: parseFloat(newProduct.prix),
+                    stock: parseInt(newProduct.stock),
+                    description: newProduct.description,
+                    imageUrl: newProduct.imageUrl,
+                    dimensions: newProduct.dimensions,
+                    poids: newProduct.poids,
+                    typeLibelle: newProduct.typeLibelle
+                };
+                await axios.post('http://localhost:9090/api/produits', productData);
+            }
             fetchProducts();
             setShowAddForm(false);
             resetForm();
             alert('✅ Produit ajouté avec succès !');
         } catch (err) {
-            console.error("Erreur lors de l'ajout:", err);
+            // Ajout du log détaillé
+            console.error("Erreur lors de l'ajout du produit (détail complet):", err);
+            if (err.response) {
+                console.error("Réponse backend:", err.response.data);
+            }
             alert("❌ Erreur lors de l'ajout du produit");
         }
     };
 
-    // Mise à jour d'un produit
     const handleUpdateProduct = async () => {
         try {
             const productData = {
@@ -106,10 +126,15 @@ const Gestionadmin = () => {
                 prix: parseFloat(newProduct.prix),
                 stock: parseInt(newProduct.stock),
                 description: newProduct.description,
-                imageUrl: newProduct.imageUrl,
-                materiaux: newProduct.materiaux.split(',').map(m => m.trim()),
+                image: newProduct.imageUrl,
                 dimensions: newProduct.dimensions,
-                poids: newProduct.poids
+                poids: newProduct.poids,
+                couleur: newProduct.couleur,
+                taille: newProduct.taille,
+                // C'est ici la clé !
+                typeOeuvre: {
+                    idType: newProduct.idTypeOeuvre // <-- il faut un id numérique ici !
+                }
             };
 
             await axios.put(`http://localhost:9090/api/produits/${editingProduct}`, productData);
@@ -119,6 +144,9 @@ const Gestionadmin = () => {
             resetForm();
         } catch (err) {
             console.error("Erreur lors de la mise à jour:", err);
+            if (err.response) {
+                console.error("Réponse backend:", err.response.data);
+            }
             alert("Erreur lors de la mise à jour du produit");
         }
     };
@@ -154,12 +182,11 @@ const Gestionadmin = () => {
 
     const resetForm = () => {
         setNewProduct({
-            nom: '',  // Changé de name
-            categorie: '',  // Changé de category
-            prix: '',  // Changé de price
+            nom: '',
+            categorie: '',
+            prix: '',
             stock: 0,
             description: '',
-            materiaux: '',  // Changé de materials
             dimensions: '',
             poids: '',  // Changé de weight
             imageUrl: '',
@@ -174,7 +201,6 @@ const Gestionadmin = () => {
         return <div className="loading">Chargement des produits...</div>;
     }
 
-    // Affichage de l'erreur
     if (error) {
         return <div className="error">{error}</div>;
     }
@@ -190,13 +216,34 @@ const Gestionadmin = () => {
                 prix: product.prix || '',
                 stock: product.stock || 0,
                 description: product.description || '',
-                materiaux: Array.isArray(product.materiaux) ? product.materiaux.join(', ') : (product.materiaux || ''),
                 dimensions: product.dimensions || '',
                 poids: product.poids || '',
-                imageUrl: product.imageUrl || '',
-                typeLibelle: product.typeLibelle || ''
+                imageUrl: product.imageUrl 
+                    ? (product.imageUrl.startsWith('http') 
+                        ? product.imageUrl 
+                        : `http://localhost:9090/images/${product.imageUrl}`)
+                    : (product.image 
+                        ? (product.image.startsWith('http') 
+                            ? product.image 
+                            : `http://localhost:9090/images/${product.image}`) 
+                        : ''),
+                typeLibelle: product.typeLibelle || '',
+                file: null 
             });
         }
+    };
+
+    // Nouvelle fonction de fallback inspirée de ProductGrid
+    // (Supprimée car doublon plus bas)
+
+    // Améliore getImageUrl pour gérer image ET imageUrl
+    const getImageUrl = (product) => {
+        if (!product) return null;
+        if (product.imageUrl && product.imageUrl.startsWith('http')) return product.imageUrl;
+        if (product.imageUrl) return `http://localhost:9090/images/${product.imageUrl}`;
+        if (product.image && product.image.startsWith('http')) return product.image;
+        if (product.image) return `http://localhost:9090/images/${product.image}`;
+        return null;
     };
 
     return (
@@ -453,7 +500,7 @@ const Gestionadmin = () => {
                     }}>
                         {editingProduct ? '✏️ Modifier le produit' : '➕ Ajouter un nouveau produit'}
                     </h2>
-                    
+
                     <div style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -472,7 +519,7 @@ const Gestionadmin = () => {
                             <input
                                 type="text"
                                 value={newProduct.nom}
-                                onChange={(e) => setNewProduct({...newProduct, nom: e.target.value})}
+                                onChange={(e) => setNewProduct({ ...newProduct, nom: e.target.value })}
                                 style={{
                                     width: '100%',
                                     padding: '0.8rem',
@@ -487,34 +534,7 @@ const Gestionadmin = () => {
                             />
                         </div>
 
-                        <div>
-                            <label style={{
-                                display: 'block',
-                                fontSize: '0.9rem',
-                                fontWeight: '600',
-                                color: '#2c3e2d',
-                                marginBottom: '0.5rem'
-                            }}>
-                                Catégorie *
-                            </label>
-                            <select
-                                value={newProduct.categorie}
-                                onChange={(e) => setNewProduct({...newProduct, categorie: e.target.value})}
-                                style={{
-                                    width: '100%',
-                                    padding: '0.8rem',
-                                    border: '2px solid #e8f5e8',
-                                    borderRadius: '10px',
-                                    fontSize: '1rem',
-                                    backgroundColor: 'white'
-                                }}
-                            >
-                                <option value="">Choisir une catégorie</option>
-                                {categories.map(cat => (
-                                    <option key={cat} value={cat}>{cat}</option>
-                                ))}
-                            </select>
-                        </div>
+                        {/* Supprimé le champ Catégorie */}
 
                         <div>
                             <label style={{
@@ -529,7 +549,7 @@ const Gestionadmin = () => {
                             <input
                                 type="number"
                                 value={newProduct.prix}
-                                onChange={(e) => setNewProduct({...newProduct, prix: e.target.value})}
+                                onChange={(e) => setNewProduct({ ...newProduct, prix: e.target.value })}
                                 style={{
                                     width: '100%',
                                     padding: '0.8rem',
@@ -556,7 +576,7 @@ const Gestionadmin = () => {
                             <input
                                 type="number"
                                 value={newProduct.stock}
-                                onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
+                                onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
                                 style={{
                                     width: '100%',
                                     padding: '0.8rem',
@@ -582,7 +602,7 @@ const Gestionadmin = () => {
                             <input
                                 type="text"
                                 value={newProduct.dimensions}
-                                onChange={(e) => setNewProduct({...newProduct, dimensions: e.target.value})}
+                                onChange={(e) => setNewProduct({ ...newProduct, dimensions: e.target.value })}
                                 style={{
                                     width: '100%',
                                     padding: '0.8rem',
@@ -602,21 +622,27 @@ const Gestionadmin = () => {
                                 color: '#2c3e2d',
                                 marginBottom: '0.5rem'
                             }}>
-                                Poids
+                                Type de produit
                             </label>
-                            <input
-                                type="text"
-                                value={newProduct.poids}
-                                onChange={(e) => setNewProduct({...newProduct, poids: e.target.value})}
+                            <select
+                                value={newProduct.typeLibelle}
+                                onChange={e => setNewProduct({ ...newProduct, typeLibelle: e.target.value })}
                                 style={{
                                     width: '100%',
                                     padding: '0.8rem',
                                     border: '2px solid #e8f5e8',
                                     borderRadius: '10px',
-                                    fontSize: '1rem'
+                                    fontSize: '1rem',
+                                    backgroundColor: 'white'
                                 }}
-                                placeholder="Ex: 15g"
-                            />
+                            >
+                                <option value="">Sélectionner un type</option>
+                                {categories.map(type => (
+                                    <option key={type.id_type_oeuvre} value={type.libelle}>
+                                        {type.libelle}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
 
@@ -628,7 +654,7 @@ const Gestionadmin = () => {
                             color: '#2c3e2d',
                             marginBottom: '0.5rem'
                         }}>
-                            📸 Image du produit (URL)
+                            📸 Image du produit (URL ou fichier)
                         </label>
                         <div style={{
                             display: 'flex',
@@ -639,7 +665,7 @@ const Gestionadmin = () => {
                                 <input
                                     type="url"
                                     value={newProduct.imageUrl}
-                                    onChange={(e) => setNewProduct({...newProduct, imageUrl: e.target.value})}
+                                    onChange={(e) => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
                                     style={{
                                         width: '100%',
                                         padding: '0.8rem',
@@ -649,12 +675,27 @@ const Gestionadmin = () => {
                                     }}
                                     placeholder="https://exemple.com/mon-image.jpg"
                                 />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={e => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            setNewProduct({ ...newProduct, file });
+                                            // Pour l'aperçu immédiat
+                                            setNewProduct(prev => ({
+                                                ...prev,
+                                                imageUrl: URL.createObjectURL(file)
+                                            }));
+                                        }
+                                    }}
+                                    style={{ marginTop: '0.5rem' }}
+                                />
                                 <p style={{
                                     fontSize: '0.75rem',
                                     color: '#7a8a77',
                                     marginTop: '0.3rem'
                                 }}>
-                                    💡 Vous pouvez utiliser des images d'Unsplash, Pexels ou télécharger sur votre serveur
                                 </p>
                             </div>
                             {newProduct.imageUrl && (
@@ -669,8 +710,8 @@ const Gestionadmin = () => {
                                     alignItems: 'center',
                                     justifyContent: 'center'
                                 }}>
-                                    <img 
-                                        src={newProduct.imageUrl} 
+                                    <img
+                                        src={newProduct.imageUrl}
                                         alt="Aperçu"
                                         style={{
                                             width: '100%',
@@ -699,7 +740,7 @@ const Gestionadmin = () => {
                         </label>
                         <textarea
                             value={newProduct.description}
-                            onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                            onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
                             style={{
                                 width: '100%',
                                 padding: '0.8rem',
@@ -710,31 +751,6 @@ const Gestionadmin = () => {
                                 resize: 'vertical'
                             }}
                             placeholder="Décrivez votre produit..."
-                        />
-                    </div>
-
-                    <div style={{ marginTop: '1.5rem' }}>
-                        <label style={{
-                            display: 'block',
-                            fontSize: '0.9rem',
-                            fontWeight: '600',
-                            color: '#2c3e2d',
-                            marginBottom: '0.5rem'
-                        }}>
-                            Matériaux (séparés par des virgules)
-                        </label>
-                        <input
-                            type="text"
-                            value={newProduct.materiaux}
-                            onChange={(e) => setNewProduct({...newProduct, materiaux: e.target.value})}
-                            style={{
-                                width: '100%',
-                                padding: '0.8rem',
-                                border: '2px solid #e8f5e8',
-                                borderRadius: '10px',
-                                fontSize: '1rem'
-                            }}
-                            placeholder="Ex: Argile, Peinture acrylique, Vernis"
                         />
                     </div>
 
@@ -890,25 +906,13 @@ const Gestionadmin = () => {
                             {products.map((product, index) => (
                                 <tr key={product.id}>
                                     <td>
-                                        {product.imageUrl ? (
-                                            <img
-                                                src={product.imageUrl}
-                                                alt={product.nom}
-                                                style={{
-                                                    width: '50px',
-                                                    height: '50px',
-                                                    objectFit: 'cover',
-                                                    borderRadius: '8px',
-                                                    border: '2px solid #e8f5e8'
-                                                }}
-                                                onError={e => {
-                                                    e.target.onerror = null;
-                                                    e.target.src = "/default-image.png";
-                                                }}
-                                            />
-                                        ) : (
-                                            <span style={{fontSize: '2rem'}}>🖼️</span>
-                                        )}
+                                        {console.log("product.imageUrl:", product.imageUrl, "product:", product)}
+                                        <img
+                                            src={getImageUrl(product)}
+                                            alt={product.nom}
+                                            onError={e => { e.target.style.display = 'none'; }}
+                                            style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #e8f5e8' }}
+                                        />
                                     </td>
                                     <td>
                                         <div>
@@ -975,7 +979,7 @@ const Gestionadmin = () => {
                                                 }}
                                                 onMouseOver={(e) => {
                                                     e.target.style.background = '#48bb78';
-                                                    e.target.style.color = 'white';
+                                                    e.target.style.color = 'white'; // <-- Correction ici
                                                 }}
                                                 onMouseOut={(e) => {
                                                     e.target.style.background = 'none';
@@ -1039,149 +1043,68 @@ const Gestionadmin = () => {
                             gap: '1.5rem'
                         }}>
                             <div>
-                                <p style={{
-                                    fontSize: '0.8rem',
-                                    color: '#7a8a77',
-                                    fontWeight: '600',
-                                    textTransform: 'uppercase',
-                                    marginBottom: '0.5rem'
-                                }}>
-                                    Image du produit
-                                </p>
-                                {products[showProductDetails].imageUrl ? (
-                                    <div style={{
-                                        width: '150px',
-                                        height: '150px',
-                                        borderRadius: '12px',
-                                        overflow: 'hidden',
-                                        border: '3px solid #e8f5e8',
-                                        background: '#f8f9fa'
-                                    }}>
-                                        <img 
-                                            src={products[showProductDetails].imageUrl} 
-                                            alt={products[showProductDetails].nom}
-                                            style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                objectFit: 'cover'
-                                            }}
-                                        />
-                                    </div>
-                                ) : (
-                                    <div style={{
-                                        width: '150px',
-                                        height: '150px',
-                                        borderRadius: '12px',
-                                        border: '3px solid #e8f5e8',
-                                        background: '#f8f9fa',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '3rem'
-                                    }}>
-                                        🖼️
-                                    </div>
-                                )}
-                            </div>
-                            <div>
-                                <p style={{
-                                    fontSize: '0.8rem',
-                                    color: '#7a8a77',
-                                    fontWeight: '600',
-                                    textTransform: 'uppercase',
-                                    marginBottom: '0.5rem'
-                                }}>
-                                    Description
-                                </p>
-                                <p style={{
-                                    fontSize: '0.9rem',
-                                    color: '#2c3e2d',
-                                    lineHeight: '1.5'
-                                }}>
-                                    {products[showProductDetails].description}
-                                </p>
-                            </div>
-                            <div>
-                                <p style={{
-                                    fontSize: '0.8rem',
-                                    color: '#7a8a77',
-                                    fontWeight: '600',
-                                    textTransform: 'uppercase',
-                                    marginBottom: '0.5rem'
-                                }}>
-                                    Matériaux
-                                </p>
-                                <div style={{
-                                    display: 'flex',
-                                    flexWrap: 'wrap',
-                                    gap: '0.5rem'
-                                }}>
-                                    {(Array.isArray(products[showProductDetails].materiaux)
-                                        ? products[showProductDetails].materiaux
-                                        : (products[showProductDetails].materiaux || '').split(',').map(m => m.trim())
-                                    ).map((material, mIndex) => (
-                                        <span key={mIndex} style={{
-                                            background: 'rgba(168, 196, 160, 0.2)',
-                                            color: '#2c3e2d',
-                                            padding: '0.3rem 0.8rem',
-                                            borderRadius: '15px',
+                                <p style={{ gap: '1.5rem' }}>
+                                    <div>
+                                        <p style={{
                                             fontSize: '0.8rem',
-                                            fontWeight: '500'
+                                            color: '#7a8a77',
+                                            fontWeight: '600',
+                                            textTransform: 'uppercase',
+                                            marginBottom: '0.5rem'
                                         }}>
-                                            {material}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                            <div>
-                                <p style={{
-                                    fontSize: '0.8rem',
-                                    color: '#7a8a77',
-                                    fontWeight: '600',
-                                    textTransform: 'uppercase',
-                                    marginBottom: '0.5rem'
-                                }}>
-                                    Dimensions
-                                </p>
-                                <p style={{
-                                }}>
-                                    📏 {products[showProductDetails].dimensions}
-                                </p>
-                            </div>
-                            <div>
-                                <p style={{
-                                    fontSize: '0.8rem',
-                                    color: '#7a8a77',
-                                    fontWeight: '600',
-                                    textTransform: 'uppercase',
-                                    marginBottom: '0.5rem'
-                                }}>
-                                    Poids
-                                </p>
-                                <p style={{
-                                    fontSize: '0.9rem',
-                                    color: '#2c3e2d',
-                                    fontWeight: '500'
-                                }}>
-                                    ⚖️ {products[showProductDetails].poids}
-                                </p>
-                            </div>
-                            <div>
-                                <p style={{
-                                    fontSize: '0.8rem',
-                                    color: '#7a8a77',
-                                    fontWeight: '600',
-                                    textTransform: 'uppercase',
-                                    marginBottom: '0.5rem'
-                                }}>
-                                    Date d'ajout
-                                </p>
-                                <p style={{
-                                    fontSize: '0.9rem',
-                                    color: '#2c3e2d',
-                                    fontWeight: '500'
-                                }}>
-                                    📅 {products[showProductDetails].dateAdded}
+                                            Image du produit
+                                        </p>
+                                        <div style={{
+                                            width: '150px',
+                                            height: '150px',
+                                            borderRadius: '12px',
+                                            overflow: 'hidden',
+                                            border: '3px solid #e8f5e8',
+                                            background: '#f8f9fa'
+                                        }}>
+                                            <img
+                                                src={getImageUrl(products[showProductDetails])}
+                                                alt={products[showProductDetails].nom}
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    objectFit: 'cover'
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p style={{
+                                            fontSize: '0.8rem',
+                                            color: '#7a8a77',
+                                            fontWeight: '600',
+                                            textTransform: 'uppercase',
+                                            marginBottom: '0.5rem'
+                                        }}>
+                                            Description
+                                        </p>
+                                        <p style={{
+                                            fontSize: '0.9rem',
+                                            color: '#2c3e2d',
+                                            lineHeight: '1.5'
+                                        }}>
+                                            {products[showProductDetails].description}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p style={{
+                                            fontSize: '0.8rem',
+                                            color: '#7a8a77',
+                                            fontWeight: '600',
+                                            textTransform: 'uppercase',
+                                            marginBottom: '0.5rem'
+                                        }}>
+                                            Dimensions
+                                        </p>
+                                        <p>
+                                            📏 {products[showProductDetails].dimensions}
+                                        </p>
+                                    </div>
                                 </p>
                             </div>
                         </div>

@@ -1,6 +1,7 @@
 package com.l2am.backend.security;
 
 import com.l2am.backend.BackendApplication;
+import com.l2am.backend.service.JwtService;
 import io.jsonwebtoken.security.SignatureException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class AuthSecurityTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private JwtService jwtService; // Assurez-vous d'injecter votre service JWT
 
     private final String VALID_JWT_TOKEN =
             "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0OEBnbWFpbC5jb20iLCJpYXQiOjE3NTE4MjI1NDAsImV4cCI6MTc1MTkwODk0MH0.8rhRurkMCHmHkmXODT1YaXTKYkqDkCaWMuHh6uVx25M";
@@ -47,5 +51,15 @@ public class AuthSecurityTest {
                     .header("Authorization", INVALID_JWT_TOKEN)
                     .accept(MediaType.APPLICATION_JSON));
         });
+    }
+
+    @Test
+    public void accessSecuredEndpoint_withExpiredToken_shouldBeUnauthorized() throws Exception {
+        String expiredToken = "Bearer " + jwtService.generateTokenWithExpiration(-3600); // 1 heure dans le passé
+
+        mockMvc.perform(get("/api/test/secure-endpoint")
+                .header("Authorization", expiredToken)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
     }
 }

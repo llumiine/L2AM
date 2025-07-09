@@ -24,36 +24,34 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-   
-
-   @Bean
-public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    return http
-        .csrf(csrf -> csrf.disable())
-        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-                "/api/auth/**",
-                "/api/produits/**",
-                "/api/public/**",
-                "/api/commentaires/**",
-                "/error"
-            ).permitAll()
-            .anyRequest().authenticated()
-        )
-
-        // 🔐 AJOUT ICI : pour forcer un 401 si non authentifié
-        .exceptionHandling(eh -> eh
-            .authenticationEntryPoint(
-                (request, response, authException) -> response.sendError(401, "Unauthorized")
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/api/auth/**",
+                    "/api/produits/**",
+                    "/api/public/**",
+                    "/api/commentaires/**",
+                    "/images/**", // <-- autorise les images ici !
+                    "/error"
+                ).permitAll()
+                .anyRequest().authenticated()
             )
-        )
 
-        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-        .build();
-}
+            // 🔐 AJOUT ICI : pour forcer un 401 si non authentifié
+            .exceptionHandling(eh -> eh
+                .authenticationEntryPoint(
+                    (request, response, authException) -> response.sendError(401, "Unauthorized")
+                )
+            )
 
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .build();
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -68,4 +66,6 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
+    // Removed deprecated configure(HttpSecurity) method.
 }

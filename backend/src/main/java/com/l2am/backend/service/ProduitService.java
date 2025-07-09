@@ -32,7 +32,9 @@ public class ProduitService {
     public List<Produit> listerTous() {
         return produitRepository.findAll();
     }
-
+public TypeOeuvre findTypeOeuvreByLibelle(String libelle) {
+    return typeOeuvreRepository.findByLibelle(libelle);
+}
     public List<Produit> rechercherParNom(String nom) {
         return produitRepository.findByNomContainingIgnoreCase(nom);
     }
@@ -74,12 +76,10 @@ public class ProduitService {
         return false;
     }
 
-    // MÉTHODE CORRIGÉE - Utilisation de getIdType() au lieu de getId()
     public List<Produit> getProduitsFiltres(List<Long> types, Double maxPrice, List<String> sizes) {
         try {
             List<Produit> produits = produitRepository.findAll();
             
-            // Si aucun filtre, retourner tous les produits
             if ((types == null || types.isEmpty()) && maxPrice == null && (sizes == null || sizes.isEmpty())) {
                 return produits;
             }
@@ -87,7 +87,6 @@ public class ProduitService {
             BigDecimal maxPriceBigDecimal = maxPrice != null ? BigDecimal.valueOf(maxPrice) : null;
 
             return produits.stream()
-                    // CORRECTION: getIdType() - correspond à votre BDD
                     .filter(p -> types == null || types.isEmpty() || 
                             (p.getTypeOeuvre() != null && types.contains(p.getTypeOeuvre().getIdType())))
                     // Filtre par prix maximum

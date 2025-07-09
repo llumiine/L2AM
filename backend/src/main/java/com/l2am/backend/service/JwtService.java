@@ -69,4 +69,17 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
+    public String generateTokenWithExpiration(int secondsFromNow) {
+        String username = "testuser@example.com"; // ou adaptez selon votre logique
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + secondsFromNow * 1000L);
+
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
 }

@@ -6,7 +6,9 @@ import com.l2am.backend.service.ProduitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -19,10 +21,49 @@ public class ProduitController {
     @Autowired
     private ProduitService produitService;
 
-    @PostMapping("/produits")
-    public ResponseEntity<Produit> creerProduit(@RequestBody Produit produit) {
-        Produit nouveauProduit = produitService.creerProduit(produit);
-        return ResponseEntity.ok(nouveauProduit);
+    @PostMapping(value = "/produits", consumes = {"multipart/form-data"})
+    public ResponseEntity<Produit> creerProduitAvecImage(
+            @RequestParam("nom") String nom,
+            @RequestParam("prix") BigDecimal prix,
+            @RequestParam("stock") Integer stock,
+            @RequestParam("description") String description,
+            @RequestParam(value = "materiaux", required = false) String materiaux,
+            @RequestParam(value = "dimensions", required = false) String dimensions,
+            @RequestParam(value = "typeLibelle", required = false) String typeLibelle,
+            @RequestParam(value = "file", required = false) MultipartFile file
+    ) {
+        try {
+            Produit produit = new Produit();
+            produit.setNom(nom);
+            produit.setPrix(prix);
+            produit.setStock(stock);
+            produit.setDescription(description);
+            produit.setDimensions(dimensions);
+            if (typeLibelle != null && !typeLibelle.isEmpty()) {
+                TypeOeuvre typeOeuvre = produitService.findTypeOeuvreByLibelle(typeLibelle);
+                if (typeOeuvre != null) {
+                    produit.setTypeOeuvre(typeOeuvre);
+                }
+            }
+            if (file != null && !file.isEmpty()) {
+                String dossierImages = System.getProperty("user.dir") + "/images/";
+                File dossier = new File(dossierImages);
+                if (!dossier.exists()) {
+                    dossier.mkdirs();
+                }
+                String originalFilename = file.getOriginalFilename();
+                String newFilename = System.currentTimeMillis() + "_" + originalFilename;
+                String cheminComplet = dossierImages + newFilename;
+                file.transferTo(new File(cheminComplet));
+                produit.setImage(newFilename);
+            }
+
+            Produit nouveauProduit = produitService.creerProduit(produit);
+            return ResponseEntity.ok(nouveauProduit);
+        } catch (Exception e) {
+            e.printStackTrace(); 
+            return ResponseEntity.status(500).build();
+        }
     }
 
     @GetMapping("/produits/{id}")
@@ -40,7 +81,7 @@ public class ProduitController {
             List<Produit> produits = produitService.getProduitsFiltres(types, maxPrice, sizes);
             return ResponseEntity.ok(produits);
         } catch (Exception e) {
-            e.printStackTrace(); // Pour le débogage
+            e.printStackTrace(); 
             return ResponseEntity.status(500).body(null);
         }
     }

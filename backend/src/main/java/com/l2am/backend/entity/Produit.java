@@ -36,7 +36,13 @@ public class Produit {
     @Column(name = "image", length = 100)
     private String image;
 
-    // Changé LAZY → EAGER pour éviter les problèmes de sérialisation JSON
+    @Column(name = "categorie", length = 100)
+    private String categorie;
+
+    @Column(name = "dimensions", length = 100)
+    private String dimensions;
+
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_type_oeuvre", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -115,6 +121,22 @@ public class Produit {
         this.image = image;
     }
 
+    public String getCategorie() {
+        return categorie;
+    }
+
+    public void setCategorie(String categorie) {
+        this.categorie = categorie;
+    }
+
+    public String getDimensions() {
+        return dimensions;
+    }
+
+    public void setDimensions(String dimensions) {
+        this.dimensions = dimensions;
+    }
+
     public TypeOeuvre getTypeOeuvre() {
         return typeOeuvre;
     }
@@ -123,13 +145,12 @@ public class Produit {
         this.typeOeuvre = typeOeuvre;
     }
 
-    // 🎯 AJOUT CRUCIAL : Cette méthode expose l'ID du type directement en JSON
     @JsonProperty("idTypeOeuvre")
     public Long getIdTypeOeuvre() {
         return typeOeuvre != null ? typeOeuvre.getIdType() : null;
     }
 
-    // 🎁 BONUS : Expose aussi le libellé du type pour l'affichage
+
     @JsonProperty("typeLibelle")
     public String getTypeLibelle() {
         return typeOeuvre != null ? typeOeuvre.getLibelle() : null;

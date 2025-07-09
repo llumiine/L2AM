@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TypeOeuvreRepository extends JpaRepository<TypeOeuvre, Long> {
+    TypeOeuvre findByLibelle(String libelle);
 }

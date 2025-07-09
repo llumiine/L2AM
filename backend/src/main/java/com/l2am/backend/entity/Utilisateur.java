@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 @Entity
-@Table(name = "utilisateur")
 public class Utilisateur implements UserDetails {
 
     @Id
@@ -19,7 +18,7 @@ public class Utilisateur implements UserDetails {
     private String email;
     private String mdp;
     
-    @JsonProperty("username") // Force Jackson à utiliser ce champ pour "username"
+    @JsonProperty("username") 
     private String username;
     
     private String nom;
@@ -31,7 +30,6 @@ public class Utilisateur implements UserDetails {
 
     public Utilisateur() {}
 
-    // Getters et setters normaux
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -41,7 +39,6 @@ public class Utilisateur implements UserDetails {
     public String getMdp() { return mdp; }
     public void setMdp(String mdp) { this.mdp = mdp; }
 
-    // ✅ Getters/setters pour le vrai username
     public String getUsernameField() { return username; }
     public void setUsername(String username) { this.username = username; }
 
@@ -63,7 +60,6 @@ public class Utilisateur implements UserDetails {
     public Integer getRole() { return role; }
     public void setRole(Integer role) { this.role = role; }
 
-    // ==== Implémentation de UserDetails ====
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -77,7 +73,7 @@ public class Utilisateur implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.email; // Pour Spring Security - utilise l'email
+        return this.email; 
     }
 
     @Override
