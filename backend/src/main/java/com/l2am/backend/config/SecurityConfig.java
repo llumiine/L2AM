@@ -26,7 +26,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
+        http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -36,21 +36,20 @@ public class SecurityConfig {
                     "/api/produits/**",
                     "/api/public/**",
                     "/api/commentaires/**",
-                    "/images/**", // <-- autorise les images ici !
+                    "/api/stripe/**", // <-- AJOUT ICI
+                    "/images/**",
                     "/error"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
-
-            // 🔐 AJOUT ICI : pour forcer un 401 si non authentifié
             .exceptionHandling(eh -> eh
                 .authenticationEntryPoint(
                     (request, response, authException) -> response.sendError(401, "Unauthorized")
                 )
             )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .build();
+        return http.build();
     }
 
     @Bean
@@ -66,6 +65,4 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
-    // Removed deprecated configure(HttpSecurity) method.
 }

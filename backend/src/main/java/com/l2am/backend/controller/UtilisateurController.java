@@ -54,14 +54,12 @@ public class UtilisateurController {
         return ResponseEntity.noContent().build();
     }
 
-    // ✅ Accessible uniquement aux admins
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/admin/clients")
     public ResponseEntity<List<Utilisateur>> listerClients() {
         return ResponseEntity.ok(utilisateurService.listerParRole(0)); // 0 = user
     }
 
-    // ✅ Récupérer l'utilisateur connecté (pour savoir si c'est un admin côté React)
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Utilisateur> getCurrentUtilisateur(Authentication authentication) {

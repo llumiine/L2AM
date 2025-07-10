@@ -12,7 +12,6 @@ import java.util.List;
 @Repository
 public interface ProduitRepository extends JpaRepository<Produit, Long> {
     
-    // Méthodes existantes
     List<Produit> findByTypeOeuvre(TypeOeuvre typeOeuvre);
     List<Produit> findByNomContainingIgnoreCase(String nom);
     List<Produit> findByStockGreaterThan(Integer stock);
@@ -21,7 +20,8 @@ public interface ProduitRepository extends JpaRepository<Produit, Long> {
     @Query("SELECT p FROM Produit p WHERE p.nom LIKE %:terme% OR p.description LIKE %:terme%")
     List<Produit> rechercheGlobale(@Param("terme") String terme);
     
-    // MÉTHODE MANQUANTE - Ajoutez cette ligne
     @Query("SELECT COUNT(p) FROM Produit p WHERE p.stock > 0")
     Long compterProduitsEnStock();
 }
+
+

@@ -21,12 +21,11 @@ public class CommentaireMongo {
     private String commentaire;
     
     @Field("note")
-    private Integer note; // 1 à 5 étoiles
+    private Integer note; 
     
     @Field("date_creation")
     private Date dateCreation;
     
-    // Constructeurs
     public CommentaireMongo() {}
     
     public CommentaireMongo(Long idUtilisateur, Long idProduit, String commentaire, Integer note) {
@@ -37,7 +36,6 @@ public class CommentaireMongo {
         this.dateCreation = new Date();
     }
     
-    // Getters et Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     

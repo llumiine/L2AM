@@ -1,12 +1,18 @@
 import React from 'react';
-import '../styles/Paiementconfirmer.css'; // Correction du chemin d'importation
+import { useLocation } from "react-router-dom";
+import '../styles/Paiementconfirmer.css';
 
 const PaiementConfirmer = () => {
+    // Exemple : récupération du prénom depuis le localStorage
+    const user = JSON.parse(localStorage.getItem('user'));
+    const prenom = user?.prenom || 'Client';
+
+    const location = useLocation();
+    const params = new URLSearchParams(location.search);
+    const numeroCommande = params.get('commande') || '...';
+
     const handleRetourAccueil = () => {
-        // Redirection vers la page d'accueil
-        console.log('Retour à la page d\'accueil');
-        // window.location.href = '/';
-        alert('Redirection vers la page d\'accueil');
+        window.location.href = '/';
     };
 
     return (
@@ -44,15 +50,14 @@ const PaiementConfirmer = () => {
                 <h1 className="confirmation-title">Paiement Confirmé</h1>
 
                 {/* Sous-titre */}
-                <p className="confirmation-subtitle">COMMANDE 20155</p>
+                <p className="confirmation-subtitle">COMMANDE {numeroCommande}</p>
 
                 {/* Message de confirmation */}
                 <div className="confirmation-message">
                     <p>
-                        Merci Marthe d'avoir acheté chez Learn'Eat. Maintenant que votre
-                        commande est confirmée, elle vous sera d'être expédiée sous 3
-                        à 4 jours ouvrables. Nous vous tiendrons informé jusqu'à jour du
-                        mises à jour de votre commande.
+                        Merci {prenom} d'avoir acheté chez L2AM Studio. Maintenant que votre
+                        commande est confirmée, elle vous sera expédiée sous 3
+                        à 4 jours ouvrables. Nous vous tiendrons informé des mises à jour de votre commande.
                     </p>
                 </div>
 

@@ -17,7 +17,6 @@ const Shop = () => {
   });
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Récupérer les produits depuis le backend
   useEffect(() => {
     const fetchProduits = async () => {
       try {

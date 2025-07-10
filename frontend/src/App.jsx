@@ -62,6 +62,16 @@ function Layout() {
             <AdresseCommande />
           </UserRoute>
         } />
+        <Route path="/paiement" element={
+          <UserRoute>
+            <Paiement />
+          </UserRoute>
+        } />
+        <Route path="/paiementconfirmer" element={
+          <UserRoute>
+            <PaiementConfirmer />
+          </UserRoute>
+        } />
 
         {/* Redirection par défaut */}
         <Route path="*" element={<Navigate to="/" replace />} />

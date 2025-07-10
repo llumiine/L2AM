@@ -1,5 +1,9 @@
 {
   "devDependencies": {
     "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@stripe/react-stripe-js": "^3.7.0",
+    "@stripe/stripe-js": "^7.4.0"
   }
 }
