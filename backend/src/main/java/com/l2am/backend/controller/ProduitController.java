@@ -27,7 +27,7 @@ public class ProduitController {
             @RequestParam("prix") BigDecimal prix,
             @RequestParam("stock") Integer stock,
             @RequestParam("description") String description,
-            // @RequestParam(value = "materiaux", required = false) String materiaux,
+            // ...existing code...
             @RequestParam(value = "dimensions", required = false) String dimensions,
             @RequestParam(value = "typeLibelle", required = false) String typeLibelle,
             @RequestParam(value = "file", required = false) MultipartFile file
@@ -39,7 +39,7 @@ public class ProduitController {
             produit.setStock(stock);
             produit.setDescription(description);
             produit.setDimensions(dimensions);
-            // Suppression de materiaux (plus utilisé)
+            // ...existing code...
             if (typeLibelle != null && !typeLibelle.isEmpty()) {
                 TypeOeuvre typeOeuvre = produitService.findTypeOeuvreByLibelle(typeLibelle);
                 if (typeOeuvre != null) {
@@ -111,7 +111,7 @@ public class ProduitController {
     ) {
         try {
             produit.setId(id);
-            // Ici, tu peux compléter la logique pour gérer le typeOeuvre si besoin
+            // ...existing code...
             Produit updated = produitService.mettreAJour(produit);
             return ResponseEntity.ok(updated);
         } catch (Exception e) {

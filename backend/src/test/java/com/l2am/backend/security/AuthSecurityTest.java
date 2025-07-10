@@ -22,7 +22,7 @@ public class AuthSecurityTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private JwtService jwtService; // Assurez-vous d'injecter votre service JWT
+    private JwtService jwtService;
 
     private final String VALID_JWT_TOKEN =
             "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0OEBnbWFpbC5jb20iLCJpYXQiOjE3NTE4MjI1NDAsImV4cCI6MTc1MTkwODk0MH0.8rhRurkMCHmHkmXODT1YaXTKYkqDkCaWMuHh6uVx25M";

@@ -10,7 +10,7 @@ public class WebConfig implements WebMvcConfigurer {    @Override
     public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("file:./images/")
-                .setCachePeriod(3600); // Cache 1 heure
+                .setCachePeriod(3600); 
         
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:./uploads/")

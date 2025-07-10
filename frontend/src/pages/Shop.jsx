@@ -37,11 +37,9 @@ const Shop = () => {
     fetchProduits();
   }, []);
 
-  // Appliquer les filtres et la recherche
   const applyFilters = () => {
     let filtered = [...produits];
 
-    // Appliquer la recherche
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -52,7 +50,6 @@ const Shop = () => {
       );
     }
 
-    // Appliquer les filtres de types
     if (currentFilters.types.length > 0) {
       const typeIds = currentFilters.types.map(typeObj => typeObj.idTypeOeuvre);
       filtered = filtered.filter((product) => 
@@ -60,21 +57,18 @@ const Shop = () => {
       );
     }
 
-    // Appliquer les filtres de couleurs
     if (currentFilters.colors.length > 0) {
       filtered = filtered.filter((product) => 
         currentFilters.colors.includes(product.couleur)
       );
     }
 
-    // Appliquer les filtres de tailles
     if (currentFilters.sizes.length > 0) {
       filtered = filtered.filter((product) => 
         currentFilters.sizes.includes(product.taille)
       );
     }
 
-    // Appliquer le filtre de prix
     filtered = filtered.filter(
       (product) => {
         const price = parseFloat(product.prix);
@@ -85,17 +79,14 @@ const Shop = () => {
     setFilteredProduits(filtered);
   };
 
-  // Effet pour appliquer les filtres quand les critères changent
   useEffect(() => {
     applyFilters();
   }, [searchTerm, currentFilters, produits]);
 
-  // Gestionnaire de recherche
   const handleSearch = (term) => {
     setSearchTerm(term);
   };
 
-  // Gestionnaire de filtres
   const handleFilterChange = (filters) => {
     setCurrentFilters(filters);
   };

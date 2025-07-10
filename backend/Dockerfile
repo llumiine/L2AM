@@ -9,7 +9,6 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
-# Variables d'environnement pour la JVM
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
 
 EXPOSE 8080

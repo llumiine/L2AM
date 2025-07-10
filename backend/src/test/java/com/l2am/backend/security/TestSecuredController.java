@@ -11,7 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public class TestSecuredController {
 
     @GetMapping("/secure-endpoint")
-    @PreAuthorize("isAuthenticated()")  // Ajout de la sécurité
+    @PreAuthorize("isAuthenticated()")  
     public ResponseEntity<String> getSecureData() {
         return ResponseEntity.ok("Accès autorisé !");
     }

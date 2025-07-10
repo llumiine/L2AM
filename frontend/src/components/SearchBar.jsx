@@ -6,7 +6,7 @@ const SearchBar = ({ onSearch }) => {
     const [activeSort, setActiveSort] = useState("note");
 
     const handleSearch = (e) => {
-        e.preventDefault(); // Empêcher le rechargement de la page
+        e.preventDefault(); 
         console.log("Recherche:", searchValue);
         if (onSearch) {
             onSearch(searchValue);
@@ -22,13 +22,12 @@ const SearchBar = ({ onSearch }) => {
         const value = e.target.value;
         setSearchValue(value);
         if (onSearch) {
-            onSearch(value); // Recherche en temps réel
+            onSearch(value); 
         }
     };
 
     return (
         <div className="search-bar-container">
-            {/* Barre de recherche principale */}
             <form onSubmit={handleSearch} className="search-input-container">
                 <input
                     type="text"
@@ -45,7 +44,6 @@ const SearchBar = ({ onSearch }) => {
                 </button>
             </form>
 
-            {/* Boutons de tri */}
             <div className="sort-buttons">
                 <button
                     className={`sort-btn ${activeSort === "note" ? "active" : ""}`}

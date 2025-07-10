@@ -20,7 +20,6 @@ public class StripeController {
 
     @PostMapping("/create-payment-intent")
     public Map<String, Object> createPaymentIntent(@RequestBody Map<String, Object> data) throws Exception {
-        // Récupérer le montant du frontend (en centimes !)
         Long amount = Long.valueOf(data.get("amount").toString());
 
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()

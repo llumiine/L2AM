@@ -3,7 +3,6 @@ import { useLocation } from "react-router-dom";
 import '../styles/Paiementconfirmer.css';
 
 const PaiementConfirmer = () => {
-    // Exemple : récupération du prénom depuis le localStorage
     const user = JSON.parse(localStorage.getItem('user'));
     const prenom = user?.prenom || 'Client';
 
@@ -19,7 +18,6 @@ const PaiementConfirmer = () => {
     return (
         <div className="confirmation-container">
             <div className="confirmation-card">
-                {/* Icône de confirmation */}
                 <div className="check-icon">
                     <svg
                         width="80"
@@ -47,15 +45,12 @@ const PaiementConfirmer = () => {
                     </svg>
                 </div>
 
-                {/* Titre principal */}
                 <h1 className="confirmation-title">Paiement Confirmé</h1>
 
 
-                {/* Sous-titre commande et facture */}
                 <p className="confirmation-subtitle">COMMANDE {numeroCommande}</p>
                 <p className="confirmation-subtitle" style={{fontSize:'18px', color:'#6a8c6a', marginTop:'-10px'}}>FACTURE {numeroFacture}</p>
 
-                {/* Message de confirmation */}
                 <div className="confirmation-message">
                     <p>
                         Merci {prenom} d'avoir acheté chez L2AM Studio. Maintenant que votre
@@ -64,7 +59,6 @@ const PaiementConfirmer = () => {
                     </p>
                 </div>
 
-                {/* Bouton de retour */}
                 <button
                     onClick={handleRetourAccueil}
                     className="retour-button"

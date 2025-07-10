@@ -1,4 +1,3 @@
-// src/context/CartContext.js
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
@@ -25,7 +24,6 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [cartCount, setCartCount] = useState(0);
 
-  // Charger le panier depuis localStorage au démarrage
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
@@ -39,7 +37,6 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
-  // Sauvegarder le panier dans localStorage à chaque modification
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cartItems));
     setCartCount(cartItems.reduce((total, item) => total + item.quantity, 0));
@@ -50,14 +47,12 @@ export const CartProvider = ({ children }) => {
       const existingItem = prevItems.find(item => item.id === product.id);
       
       if (existingItem) {
-        // Si le produit existe déjà, augmenter la quantité
         return prevItems.map(item =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       } else {
-        // Sinon, ajouter le nouveau produit
         return [...prevItems, { ...product, quantity }];
       }
     });

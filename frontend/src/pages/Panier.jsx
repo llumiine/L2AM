@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCart } from '../context/CartContext'; // AJOUT
+import { useCart } from '../context/CartContext';
 
 const Panier = () => {
   const navigate = useNavigate();
@@ -180,7 +180,7 @@ const Panier = () => {
                   src={getImageUrl(item) || getFallbackImage(item)}
                   alt={item.nom}
                   onError={(e) => {
-                    console.log('Erreur chargement image dans panier, utilisation du fallback');
+                    //
                     e.target.src = getFallbackImage(item);
                   }}
                   style={{

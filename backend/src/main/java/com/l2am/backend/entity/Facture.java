@@ -34,15 +34,11 @@ public class Facture {
     @Column(name = "code_postal", length = 50)
     private String codePostal;
     
-    // Constructeurs
     public Facture() {}
-    
     public Facture(Date datePaiement, BigDecimal total) {
         this.datePaiement = datePaiement;
         this.total = total;
     }
-    
-    // Getters et Setters
     public Long getIdFacture() { return idFacture; }
     public void setIdFacture(Long idFacture) { this.idFacture = idFacture; }
     

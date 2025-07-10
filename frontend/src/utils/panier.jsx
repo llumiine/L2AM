@@ -1,4 +1,3 @@
-// Logique métier du panier (séparée du composant React)
 export class PanierService {
   static ajouterProduit(produit, utilisateur) {
     if (!utilisateur || !utilisateur.connecte) {
@@ -8,7 +7,6 @@ export class PanierService {
       }
     }
     
-    // Logique d'ajout au panier
     const panier = JSON.parse(localStorage.getItem('panier') || '[]')
     panier.push(produit)
     localStorage.setItem('panier', JSON.stringify(panier))

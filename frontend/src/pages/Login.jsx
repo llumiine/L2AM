@@ -21,11 +21,11 @@ const Login = () => {
 
       const utilisateur = response.data.utilisateur;
       
-      // Stockage des données
+      
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(utilisateur));
       
-      // Vérification du rôle (0 = user, 1 = admin)
+      
       if (utilisateur.role === 1) {
         console.log("Connexion admin réussie");
         navigate("/gestionadmin");

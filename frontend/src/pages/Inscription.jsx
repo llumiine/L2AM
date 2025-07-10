@@ -11,7 +11,7 @@ const Inscription = () => {
   const [mdp, setMdp] = useState("");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // Ajoutez cet état avec les autres états en haut du composant
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -239,7 +239,7 @@ Détails de la commande ${commandeId}:
                 backgroundColor: "#f8f9fa",
             }}
         >
-            {/* Sidebar */}
+            
             <div
                 style={{
                     width: "320px",
@@ -399,7 +399,7 @@ Détails de la commande ${commandeId}:
                         gap: "3rem",
                     }}
                 >
-                    {/* Section Adresse */}
+                    
                     <div
                         style={{
                             background: "white",
@@ -633,7 +633,7 @@ Détails de la commande ${commandeId}:
                             </div>
                         ) : (
                             <>
-                                {/* Commande la plus récente */}
+                                
                                 <div
                                     style={{
                                         display: "flex",
@@ -779,7 +779,7 @@ Détails de la commande ${commandeId}:
                                         </button>
                                     </div>
                                 )}
-                                {/* Affichage des autres commandes si demandé */}
+                                
                                 {showAllCommandes && (
                                     <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                         {(() => {
@@ -901,7 +901,7 @@ Détails de la commande ${commandeId}:
                             </>
                         )}
 
-                        {/* Footer de section */}
+                        
                         <div
                             style={{
                                 textAlign: "center",
@@ -913,7 +913,7 @@ Détails de la commande ${commandeId}:
                             }}
                         >
                             
-                            {/* Formulaire de commentaire client */}
+                            
 <div
     style={{
         marginTop: "3rem",

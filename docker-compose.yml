@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # Base de données MySQL
   mysql:
     image: mysql:8.0
     container_name: l2am-mysql
@@ -11,11 +10,10 @@ services:
       MYSQL_USER: l2am
       MYSQL_PASSWORD: l2ampass
     ports:
-      - "3307:3306"  # Port externe changé pour éviter le conflit
+      - "3307:3306"  
     volumes:
       - mysql_data:/var/lib/mysql
 
-  # MongoDB pour les commentaires
   mongodb:
     image: mongo:latest
     container_name: l2am-mongodb
@@ -23,18 +21,16 @@ services:
       MONGO_INITDB_ROOT_USERNAME: l2am
       MONGO_INITDB_ROOT_PASSWORD: l2ampass
     ports:
-      - "27018:27017"  # Port externe changé pour éviter le conflit
-    volumes:
+      - "27018:27017" 
       - mongodb_data:/data/db
 
-  # Backend Spring Boot
   backend:
     build: 
       context: ./backend
       dockerfile: Dockerfile
     container_name: l2am-backend
     ports:
-      - "9090:8080"   # Port externe changé pour éviter le conflit
+      - "9090:8080"   
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/l2am
       SPRING_DATASOURCE_USERNAME: l2am
@@ -44,16 +40,15 @@ services:
       - mysql
       - mongodb
 
-  # Frontend React
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: l2am-frontend
     ports:
-      - "5174:5173"  # Port externe changé pour éviter le conflit
+      - "5174:5173"  
     environment:
-      VITE_API_URL: http://localhost:8081  # URL mise à jour avec le nouveau port
+      VITE_API_URL: http://localhost:8081  
     depends_on:
       - backend
 

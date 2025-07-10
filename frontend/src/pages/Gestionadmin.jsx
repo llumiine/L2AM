@@ -570,7 +570,7 @@ const Gestionadmin = () => {
                             />
                         </div>
 
-                        {/* Supprimé le champ Catégorie */}
+                        
 
                         <div>
                             <label style={{

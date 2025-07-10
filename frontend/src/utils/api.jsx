@@ -3,12 +3,10 @@ import axios from 'axios'
 export class ApiService {
   static async getProduits() {
     try {
-      // Utilise axios que vous avez déjà installé
       const response = await axios.get('/api/produits')
       return response.data
     } catch (error) {
       console.error('Erreur API:', error)
-      // Retour de données mock en cas d'erreur (pour les tests)
       return [
         { id: 1, nom: 'Produit 1', prix: 19.99, description: 'Description 1' },
         { id: 2, nom: 'Produit 2', prix: 29.99, description: 'Description 2' },

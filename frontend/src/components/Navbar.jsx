@@ -110,7 +110,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="container">
-        {/* Logo */}
+        
         <div className="navbar-logo">
           <Link to="/">
             <img src={logo} alt="L2AM Logo" className="navbar-logo-img" />

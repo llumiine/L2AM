@@ -3,25 +3,25 @@ import axios from "axios";
 import "../styles/FilterSidebar.css";
 
 const FilterSidebar = ({ onFilterChange }) => {
-  // États pour les sélections
+  
   const [selectedTypeIds, setSelectedTypeIds] = useState([]);
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [priceRange, setPriceRange] = useState({ min: 0, max: 200 });
   const [currentMaxPrice, setCurrentMaxPrice] = useState(200);
   
-  // États pour les données dynamiques
+  
   const [types, setTypes] = useState([]);
   const [colors, setColors] = useState([]);
   const [sizes, setSizes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Contrôle du chargement unique
+  
   const hasLoadedData = useRef(false);
   const isLoadingData = useRef(false);
 
-  // Charger les données une seule fois
+  
   useEffect(() => {
     if (hasLoadedData.current || isLoadingData.current) {
       return;
@@ -37,18 +37,18 @@ const FilterSidebar = ({ onFilterChange }) => {
     try {
       setLoading(true);
       
-      // Récupérer les produits
+      
       const produitsResponse = await axios.get('http://localhost:9090/api/produits');
       const produits = produitsResponse.data;
       
-      // Types par défaut
+      
       const defaultTypes = [
         { idTypeOeuvre: 1, libelle: "Digital", nom: null },
         { idTypeOeuvre: 2, libelle: "Argile", nom: null },
         { idTypeOeuvre: 3, libelle: "Calligraphie", nom: null }
       ];
       
-      // Extraction des données depuis les produits
+      
       const uniqueColors = [...new Set(
         produits.map(p => p.couleur).filter(c => c && c.trim())
       )];
@@ -62,7 +62,7 @@ const FilterSidebar = ({ onFilterChange }) => {
         { min: Math.floor(Math.min(...prices)), max: Math.ceil(Math.max(...prices)) } :
         { min: 0, max: 200 };
       
-      // Mise à jour des états
+      
       setTypes(defaultTypes);
       setColors(uniqueColors);
       setSizes(uniqueSizes);
@@ -74,7 +74,7 @@ const FilterSidebar = ({ onFilterChange }) => {
       console.error('Erreur chargement filtres:', err);
       setError('Erreur de chargement');
       
-      // Données par défaut en cas d'erreur
+      
       setTypes([
         { idTypeOeuvre: 1, libelle: "Digital", nom: null },
         { idTypeOeuvre: 2, libelle: "Argile", nom: null },
@@ -90,14 +90,14 @@ const FilterSidebar = ({ onFilterChange }) => {
     }
   };
 
-  // Handlers mémorisés pour éviter les re-renders
+  
   const handleTypeToggle = useCallback((typeId) => {
     setSelectedTypeIds(prev => {
       const newIds = prev.includes(typeId)
         ? prev.filter(id => id !== typeId)
         : [...prev, typeId];
       
-      // Notification avec timeout pour éviter les appels multiples
+      
       setTimeout(() => {
         const selectedTypeObjects = types.filter(t => newIds.includes(t.idTypeOeuvre));
         if (onFilterChange) {
@@ -121,7 +121,7 @@ const FilterSidebar = ({ onFilterChange }) => {
         ? prev.filter(i => i !== item)
         : [...prev, item];
       
-      // Notification avec timeout
+      
       setTimeout(() => {
         if (onFilterChange) {
           const selectedTypeObjects = types.filter(t => selectedTypeIds.includes(t.idTypeOeuvre));
@@ -143,7 +143,7 @@ const FilterSidebar = ({ onFilterChange }) => {
     const price = parseInt(newPrice);
     setCurrentMaxPrice(price);
     
-    // Notification avec timeout
+    
     setTimeout(() => {
       if (onFilterChange) {
         const selectedTypeObjects = types.filter(t => selectedTypeIds.includes(t.idTypeOeuvre));
@@ -158,7 +158,7 @@ const FilterSidebar = ({ onFilterChange }) => {
     }, 100); // Délai plus long pour le prix (éviter trop d'appels)
   }, [types, selectedTypeIds, selectedColors, selectedSizes, priceRange.min, onFilterChange]);
 
-  // Reset des filtres
+  
   const resetFilters = useCallback(() => {
     setSelectedTypeIds([]);
     setSelectedColors([]);
@@ -193,7 +193,7 @@ const FilterSidebar = ({ onFilterChange }) => {
         <div className="error-message">⚠️ {error}</div>
       )}
 
-      {/* Types d'œuvre */}
+      
       <div className="filter-section">
         <h3>
           Type d'œuvre 
@@ -219,7 +219,7 @@ const FilterSidebar = ({ onFilterChange }) => {
         </div>
       </div>
 
-      {/* Couleurs */}
+      
       <div className="filter-section">
         <h3>
           Couleur 
@@ -247,7 +247,7 @@ const FilterSidebar = ({ onFilterChange }) => {
         </div>
       </div>
 
-      {/* Tailles */}
+      
       <div className="filter-section">
         <h3>
           Taille 
@@ -270,7 +270,7 @@ const FilterSidebar = ({ onFilterChange }) => {
         </div>
       </div>
 
-      {/* Prix */}
+      
       <div className="filter-section">
         <h3>Prix (jusqu'à {currentMaxPrice}€)</h3>
         <div className="price-filter">
@@ -290,7 +290,7 @@ const FilterSidebar = ({ onFilterChange }) => {
         </div>
       </div>
 
-      {/* Actions */}
+      
       <div className="filter-actions">
         <button 
           className="reset-button" 
@@ -301,7 +301,7 @@ const FilterSidebar = ({ onFilterChange }) => {
         </button>
       </div>
 
-      {/* Filtres actifs */}
+      
       {(selectedTypeIds.length > 0 || selectedColors.length > 0 || selectedSizes.length > 0) && (
         <div className="active-filters-summary">
           <h4>Filtres actifs:</h4>
@@ -336,7 +336,7 @@ const FilterSidebar = ({ onFilterChange }) => {
   );
 };
 
-// Fonction utilitaire pour les couleurs
+//
 const getColorCode = (colorName) => {
   const colorMap = {
     'Rouge': '#ff4757',

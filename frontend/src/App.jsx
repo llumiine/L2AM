@@ -6,15 +6,15 @@ import Shop from "./pages/Shop";
 import Login from "./pages/Login";
 import Inscription from "./pages/Inscription";
 import ProductPage from "./pages/ProductPage";
-import Propos from "./pages/Propos"; // Vérifiez que l'import est présent
-import Contact from "./pages/Contact"; // Ajoutez cet import
-import Panier from "./pages/Panier"; // Ajoutez cet import
-import Paiement from "./pages/Paiement"; // Ajoutez cet import
+import Propos from "./pages/Propos";
+import Contact from "./pages/Contact";
+import Panier from "./pages/Panier";
+import Paiement from "./pages/Paiement";
 import PageClient from "./pages/Pageclient";
 import AdresseCommande from "./pages/Adressecommande";
 import PaiementConfirmer from "./pages/Paiementconfirmer";
 import Admin from "./pages/Admin";
-import { CartProvider } from './context/CartContext'; // IMPORTANT : Ajoutez cette ligne
+import { CartProvider } from './context/CartContext';
 import Gestionadmin from "./pages/Gestionadmin";
 import AdminRoute from "./components/AdminRoute";
 import UserRoute from "./components/UserRoute";
@@ -25,7 +25,7 @@ function Layout() {
     <div className="font-sans text-gray-800">
       <Navbar />
       <Routes>
-        {/* Routes publiques */}
+        
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Inscription />} />
@@ -34,7 +34,7 @@ function Layout() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/product/:id" element={<ProductPage />} />
 
-        {/* Routes administrateur */}
+        
         <Route path="/admin" element={
           <AdminRoute>
             <Admin />
@@ -46,7 +46,7 @@ function Layout() {
           </AdminRoute>
         } />
 
-        {/* Routes utilisateur */}
+        
         <Route path="/pageclient" element={
           <UserRoute>
             <PageClient />
@@ -73,7 +73,7 @@ function Layout() {
           </UserRoute>
         } />
 
-        {/* Redirection par défaut */}
+        
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />

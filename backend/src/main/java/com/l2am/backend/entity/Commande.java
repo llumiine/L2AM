@@ -27,9 +27,7 @@ public class Commande {
     @Column(name = "prix_achat", precision = 10, scale = 2)
     private BigDecimal prixAchat;
     
-    // Constructeurs
     public Commande() {}
-    
     public Commande(Long idUtilisateur, Long idProduit, Long idFacture, Integer quantite, BigDecimal prixAchat) {
         this.idUtilisateur = idUtilisateur;
         this.idProduit = idProduit;
@@ -37,8 +35,6 @@ public class Commande {
         this.quantite = quantite;
         this.prixAchat = prixAchat;
     }
-    
-    // Getters et Setters
     public Long getIdCommande() { return idCommande; }
     public void setIdCommande(Long idCommande) { this.idCommande = idCommande; }
     

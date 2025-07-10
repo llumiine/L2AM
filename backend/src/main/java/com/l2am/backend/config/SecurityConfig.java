@@ -36,7 +36,7 @@ public class SecurityConfig {
                     "/api/produits/**",
                     "/api/public/**",
                     "/api/commentaires/**",
-                    "/api/stripe/**", // <-- AJOUT ICI
+                    "/api/stripe/**", 
                     "/images/**",
                     "/error"
                 ).permitAll()

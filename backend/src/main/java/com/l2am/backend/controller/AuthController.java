@@ -31,21 +31,16 @@ public class AuthController {
     @Transactional
     public ResponseEntity<?> register(@RequestBody Utilisateur utilisateur) {
         try {
-            // Vérification email existant
             if (utilisateurService.trouverParEmail(utilisateur.getEmail()).isPresent()) {
                 return ResponseEntity.badRequest().body("Email déjà utilisé");
             }
 
-            // Hachage du mot de passe
             utilisateur.setMdp(passwordEncoder.encode(utilisateur.getMdp()));
 
-            // Création utilisateur
             Utilisateur created = utilisateurService.creerUtilisateur(utilisateur);
 
-            // Génération token
             String token = jwtService.generateToken(created);
 
-            // Réponse avec token + utilisateur
             return ResponseEntity.ok(new AuthResponse(token, created));
             
         } catch (Exception e) {
@@ -57,16 +52,13 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
         String email = credentials.get("email");
         String mdp = credentials.get("mdp");
-        
         if (email == null || mdp == null) {
             return ResponseEntity.status(400).body("Email et mot de passe requis");
         }
-
         try {
             Optional<Utilisateur> userOpt = utilisateurService.trouverParEmail(email);
             if (userOpt.isPresent()) {
                 Utilisateur user = userOpt.get();
-                
                 if (passwordEncoder.matches(mdp, user.getMdp())) {
                     String token = jwtService.generateToken(user);
                     return ResponseEntity.ok(new AuthResponse(token, user));
@@ -75,7 +67,6 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Erreur serveur");
         }
-        
         return ResponseEntity.status(401).body("Identifiants invalides");
     }
 }

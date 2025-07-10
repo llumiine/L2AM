@@ -21,15 +21,13 @@ const StripeCardForm = ({ onPaymentSuccess }) => {
     setIsProcessing(true);
     setError(null);
     try {
-      // Appel backend pour obtenir le clientSecret
-      const total = 1000; // Remplace par le montant réel du panier en centimes
+      const total = 1000;
       const res = await fetch("http://localhost:9090/api/stripe/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: total }),
       });
       const { clientSecret } = await res.json();
-
       const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: elements.getElement(CardElement),
@@ -38,25 +36,20 @@ const StripeCardForm = ({ onPaymentSuccess }) => {
           },
         },
       });
-
       if (stripeError) {
         setError(stripeError.message);
         setIsProcessing(false);
         return;
       }
       if (paymentIntent.status === "succeeded") {
-        // Création de la facture AVANT les commandes
         try {
           const panier = JSON.parse(localStorage.getItem('cart') || '[]');
           const user = JSON.parse(localStorage.getItem('user'));
-          console.log('DEBUG PANIER:', panier);
-          console.log('DEBUG USER:', user);
           if (!panier || !Array.isArray(panier) || panier.length === 0) {
             setError("Erreur : le panier est vide ou non défini. Impossible de créer une commande.");
             setIsProcessing(false);
             return;
           }
-          // Création de la facture
           const totalPanier = panier.reduce((acc, p) => acc + (p.prix * p.quantite), 0);
           const token = localStorage.getItem('token');
           const facturePayload = {
@@ -88,20 +81,16 @@ const StripeCardForm = ({ onPaymentSuccess }) => {
             setIsProcessing(false);
             throw new Error('Erreur API Facture: ' + resFacture.status);
           }
-          // Stocke l'id de la facture
           localStorage.setItem('idFacture', factureCree.idFacture);
-          // Création des commandes liées à la facture
           const commandesCreees = [];
-          console.log('DEBUG nombre de produits à commander:', panier.length);
           for (const produit of panier) {
             const commandePayload = {
               idUtilisateur: user?.id,
               idProduit: produit.id,
               quantite: produit.quantite,
               prixAchat: produit.prix,
-              idFacture: factureCree.idFacture // Lien facture-commande
+              idFacture: factureCree.idFacture
             };
-            console.log('Envoi de la commande :', commandePayload);
             const resCmd = await fetch("http://localhost:9090/api/commandes", {
               method: "POST",
               headers: {
@@ -110,11 +99,7 @@ const StripeCardForm = ({ onPaymentSuccess }) => {
               },
               body: JSON.stringify(commandePayload),
             });
-            console.log('Réponse brute:', resCmd);
-            console.log('Status:', resCmd.status);
-            console.log('Headers:', [...resCmd.headers]);
             const text = await resCmd.text();
-            console.log('Body:', text);
             let commandeCree = null;
             try {
               commandeCree = JSON.parse(text);
@@ -128,7 +113,6 @@ const StripeCardForm = ({ onPaymentSuccess }) => {
           if (commandesCreees.length > 0 && firstCommande && firstCommande.idCommande) {
             localStorage.setItem('idCommande', firstCommande.idCommande);
             if (onPaymentSuccess) onPaymentSuccess();
-            // Passe aussi l'idFacture dans l'URL
             const idFacture = localStorage.getItem('idFacture');
             navigate(`/paiementconfirmer?commande=${firstCommande.idCommande}&facture=${idFacture}`);
           } else {

@@ -5,7 +5,7 @@ export default function Hero() {
   const [scrollY, setScrollY] = useState(0);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Seulement 4 images
+  
   const carouselImages = [
     { id: 1, src: "/images/art1.jpg", alt: "Gâteau Fraise Digital" },
     { id: 2, src: "/images/art2.jpg", alt: "Porte-Bijoux Argile" },

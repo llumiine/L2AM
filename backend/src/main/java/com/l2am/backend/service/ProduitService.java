@@ -79,28 +79,21 @@ public TypeOeuvre findTypeOeuvreByLibelle(String libelle) {
     public List<Produit> getProduitsFiltres(List<Long> types, Double maxPrice, List<String> sizes) {
         try {
             List<Produit> produits = produitRepository.findAll();
-            
             if ((types == null || types.isEmpty()) && maxPrice == null && (sizes == null || sizes.isEmpty())) {
                 return produits;
             }
-            
             BigDecimal maxPriceBigDecimal = maxPrice != null ? BigDecimal.valueOf(maxPrice) : null;
-
             return produits.stream()
                     .filter(p -> types == null || types.isEmpty() || 
                             (p.getTypeOeuvre() != null && types.contains(p.getTypeOeuvre().getIdType())))
-                    // Filtre par prix maximum
                     .filter(p -> maxPriceBigDecimal == null || 
                             (p.getPrix() != null && p.getPrix().compareTo(maxPriceBigDecimal) <= 0))
-                    // Filtre par tailles
                     .filter(p -> sizes == null || sizes.isEmpty() || 
                             (p.getTaille() != null && sizes.contains(p.getTaille())))
                     .collect(Collectors.toList());
-                    
         } catch (Exception e) {
             System.err.println("Erreur dans getProduitsFiltres: " + e.getMessage());
             e.printStackTrace();
-            // En cas d'erreur, retourner tous les produits
             return produitRepository.findAll();
         }
     }
@@ -111,14 +104,14 @@ public TypeOeuvre findTypeOeuvreByLibelle(String libelle) {
         } catch (Exception e) {
             System.err.println("Erreur dans getAllTypesOeuvre: " + e.getMessage());
             e.printStackTrace();
-            return List.of(); // Retourner une liste vide en cas d'erreur
+            return List.of();
         }
     }
 
     public Double getPrixMaximum() {
         try {
             return produitRepository.findAll().stream()
-                    .filter(p -> p.getPrix() != null) // Vérification null
+                    .filter(p -> p.getPrix() != null)
                     .map(Produit::getPrix)
                     .max(BigDecimal::compareTo)
                     .map(BigDecimal::doubleValue)

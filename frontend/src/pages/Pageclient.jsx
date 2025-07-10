@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Ajout pour la navigation
-import '../styles/Pageclient.css'; // Votre CSS existant
+import { useNavigate } from 'react-router-dom';
+import '../styles/Pageclient.css';
 
 const PageClient = () => {
     const navigate = useNavigate(); // Hook pour la navigation
     
-    // État pour les données utilisateur (récupérées du localStorage et API)
+    
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // État pour le formulaire
+    
     const [formData, setFormData] = useState({
         nom: '',
         prenom: '',
@@ -23,7 +23,7 @@ const PageClient = () => {
         nouveauMotDePasse: ''
     });
 
-    // États pour l'UI
+    
     const [activeMenu, setActiveMenu] = useState('Détails');
     const [showPasswordSection, setShowPasswordSection] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -31,13 +31,13 @@ const PageClient = () => {
     const [showOldPassword, setShowOldPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
 
-    // Configuration API
+    
     const API_BASE_URL = 'http://localhost:9090/api';
 
-    // Fonction pour récupérer le token
+    
     const getToken = () => localStorage.getItem('token');
 
-    // Fonction pour faire des appels API
+    
     const apiCall = async (endpoint, options = {}) => {
         try {
             const headers = {
@@ -72,23 +72,23 @@ const PageClient = () => {
         }
     };
 
-    // Chargement des données utilisateur au montage du composant
+    
     useEffect(() => {
         loadUserData();
     }, []);
 
-    // Charger les données de l'utilisateur connecté
+    
     const loadUserData = async () => {
         try {
             setLoading(true);
             
-            // D'abord, récupérer depuis localStorage
+            
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 const user = JSON.parse(storedUser);
                 setUserData(user);
                 
-                // Initialiser le formulaire
+                
                 setFormData({
                     nom: user.nom || '',
                     prenom: user.prenom || '',
@@ -102,7 +102,7 @@ const PageClient = () => {
                 });
             }
 
-            // Ensuite, récupérer les données fraîches depuis l'API
+            
             try {
                 const freshUserData = await apiCall('/utilisateurs/me');
                 setUserData(freshUserData);
@@ -129,14 +129,14 @@ const PageClient = () => {
         } finally {
             setLoading(false);
         }
-    };    // Configuration des menus - MISE À JOUR
+    };
     const menuItems = [
         { name: "Détails", icon: "📝" },
         { name: "Adresse et Commande", icon: "📦" },
         { name: "Déconnexion", icon: "🚪" },
     ];
 
-    // Gestion des changements dans les inputs
+    
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -145,7 +145,7 @@ const PageClient = () => {
         }));
     };
 
-    // Validation du formulaire
+    
     const validateForm = () => {
         const errors = [];
         if (!formData.nom) errors.push('Le nom est requis');
@@ -158,7 +158,7 @@ const PageClient = () => {
         return errors;
     };
 
-    // Remplacez votre fonction handleSubmit par celle-ci :
+    
 
 const handleSubmit = async (e) => {
     e.preventDefault();
@@ -172,7 +172,7 @@ const handleSubmit = async (e) => {
     setIsLoading(true);
     
     try {
-        // 1. Si l'utilisateur veut changer son mot de passe, le faire en premier
+        
         if (showPasswordSection && formData.nouveauMotDePasse) {
             try {
                 await apiCall('/utilisateurs/changer-mot-de-passe', {
@@ -185,7 +185,7 @@ const handleSubmit = async (e) => {
                 
                 console.log('Mot de passe modifié avec succès');
             } catch (passwordError) {
-                // Gestion des erreurs spécifiques au mot de passe
+                
                 console.error('Erreur changement mot de passe:', passwordError);
                 let errorMessage = 'Erreur lors du changement de mot de passe';
                 
@@ -199,7 +199,7 @@ const handleSubmit = async (e) => {
             }
         }
 
-        // 2. Mettre à jour les autres informations (nom, prénom, etc.)
+        
         const updateData = {
             nom: formData.nom,
             prenom: formData.prenom,
@@ -218,7 +218,7 @@ const handleSubmit = async (e) => {
         setUserData(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
         
-        // 3. Message de succès et nettoyage
+        
         const successMessage = showPasswordSection && formData.nouveauMotDePasse 
             ? 'Informations et mot de passe mis à jour avec succès !' 
             : 'Informations mises à jour avec succès !';
@@ -241,7 +241,7 @@ const handleSubmit = async (e) => {
 };
 
 
-// Ajouter après les autres fonctions et avant le return
+//
 const handlePasswordChange = async (e) => {
     e.preventDefault();
     
@@ -275,12 +275,12 @@ const handlePasswordChange = async (e) => {
     }
 };
     
-   // Gestion du clic sur les menus - MISE À JOUR
+   
     const handleMenuClick = (item) => {
         setActiveMenu(item.name);
         switch (item.name) {
             case "Détails":
-                // Rester sur la même page
+                
                 break;
             case "Adresse et Commande":
                 navigate('/adresse-commande');
@@ -297,7 +297,7 @@ const handlePasswordChange = async (e) => {
         }
     };
 
-    // Annulation de l'édition
+    
     const handleCancelEdit = () => {
         setFormData({
             nom: userData.nom || '',
@@ -314,7 +314,7 @@ const handlePasswordChange = async (e) => {
         setShowPasswordSection(false);
     };
 
-    // Affichage du loader pendant le chargement
+    
     if (loading) {
         return (
             <div style={{ 
@@ -330,7 +330,7 @@ const handlePasswordChange = async (e) => {
         );
     }
 
-    // Affichage en cas d'erreur
+    
     if (error) {
         return (
             <div style={{ 
@@ -361,7 +361,7 @@ const handlePasswordChange = async (e) => {
         );
     }
 
-    // Affichage si pas de données utilisateur
+    
     if (!userData) {
         return (
             <div style={{ 
@@ -383,7 +383,7 @@ const handlePasswordChange = async (e) => {
             fontFamily: "system-ui, -apple-system, sans-serif",
             backgroundColor: "#f8f9fa",
         }}>
-            {/* Sidebar - NOUVELLE VERSION */}
+            
             <div style={{
                 width: "320px",
                 background: "linear-gradient(135deg, #a8c4a0, #8fb085)",
@@ -489,7 +489,6 @@ const handlePasswordChange = async (e) => {
                 </nav>
             </div>
 
-            {/* Contenu principal */}
             <div style={{
                 flex: 1,
                 padding: "3rem",
@@ -523,7 +522,7 @@ const handlePasswordChange = async (e) => {
                     boxShadow: "0 8px 30px rgba(168, 196, 160, 0.15)",
                     border: "1px solid #e8f5e8",
                 }}>
-                    {/* Le reste de votre formulaire existant */}
+                    
                     <div className="card-header">
                         <h2 className="card-title">📝 Détails du compte</h2>
                         <button
@@ -536,7 +535,7 @@ const handlePasswordChange = async (e) => {
                     </div>
 
                     <form onSubmit={handleSubmit}>
-                        {/* Section informations personnelles */}
+                        
                         <div className="form-section personal-info">
                             <h3 className="section-title">
                                 👤 Informations personnelles
@@ -595,7 +594,7 @@ const handlePasswordChange = async (e) => {
                                 />
                             </div>
 
-                            {/* Section adresse */}
+                            
                             <div className="form-grid">
                                 <div className="form-group">
                                     <label className="form-label">Adresse</label>
@@ -638,7 +637,7 @@ const handlePasswordChange = async (e) => {
                             </div>
                         </div>
 
-                        {/* Section mot de passe */}
+                        
                         <div className="form-section security">
                             <div className="section-header">
                                 <h3 className="section-title">
@@ -708,7 +707,7 @@ const handlePasswordChange = async (e) => {
                                                 </button>
                                             </div>
                                             <p className="password-hint">
-                                                💡 Utilisez au moins 8 caractères
+                                                Utilisez au moins 8 caractères
                                             </p>
                                             <button
                                                 type="submit"
@@ -723,7 +722,7 @@ const handlePasswordChange = async (e) => {
                             )}
                         </div>
 
-                        {/* Boutons d'action */}
+                        
                         {isEditing && (
                             <div className="action-buttons">
                                 <button
@@ -746,7 +745,7 @@ const handlePasswordChange = async (e) => {
                         )}
                     </form>
 
-                    {/* Informations de sécurité */}
+                    
                     {!isEditing && (
                         <div className="security-info">
                             <h4 className="security-info-title">
