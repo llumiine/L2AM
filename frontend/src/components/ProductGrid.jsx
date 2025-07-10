@@ -27,6 +27,11 @@ export default function ProductGrid({ products = [] }) {
 
   const getImageUrl = (product) => {
     if (!product?.image) return null;
+    // Si l'URL de l'image commence par http (absolue), on la retourne telle quelle
+    if (/^https?:\/\//.test(product.image)) {
+      return product.image;
+    }
+    // Sinon, on construit l'URL complète côté backend
     return `http://localhost:9090/images/${product.image}`;
   };
 

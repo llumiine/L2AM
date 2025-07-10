@@ -12,40 +12,45 @@ const AdresseCommande = () => {
     const [commandes, setCommandes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [commentaire, setCommentaire] = useState("");
-const [note, setNote] = useState("");
+    const [note, setNote] = useState("");
+    const [showAllCommandes, setShowAllCommandes] = useState(false);
 
 
     // Charger les données utilisateur et commandes
     useEffect(() => {
-        const loadUserData = () => {
+        const loadUserDataAndCommandes = async () => {
             try {
-                // Charger les données utilisateur
+                // Charger l'utilisateur connecté
                 const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-                const users = JSON.parse(localStorage.getItem("users") || "[]");
-                const user =
-                    users.find((u) => u.email === currentUser.email) || currentUser;
-                setUserData(user);
-                setAdresse(user.adresse || "");
-                setVille(user.ville || "");
-                setCodePostal(user.codePostal || "");
+                setUserData(currentUser);
+                setAdresse(currentUser.adresse || "");
+                setVille(currentUser.ville || "");
+                setCodePostal(currentUser.codePostal || "");
 
-                // Charger les commandes
-                const allCommandes = JSON.parse(
-                    localStorage.getItem("commandes") || "[]"
-                );
-                const userCommandes = allCommandes.filter(
-                    (cmd) => cmd.userId === user.id
-                );
-                setCommandes(userCommandes);
-
+                // Charger les commandes du backend pour cet utilisateur
+                if (currentUser.id) {
+                    const token = localStorage.getItem("token");
+                    const res = await fetch(`http://localhost:9090/api/commandes`, {
+                        headers: {
+                            "Authorization": token ? `Bearer ${token}` : undefined,
+                            "Content-Type": "application/json"
+                        }
+                    });
+                    if (!res.ok) throw new Error("Erreur lors du chargement des commandes");
+                    const allCommandes = await res.json();
+                    // Filtrer les commandes de l'utilisateur connecté
+                    const userCommandes = allCommandes.filter(cmd => cmd.idUtilisateur === currentUser.id);
+                    setCommandes(userCommandes);
+                } else {
+                    setCommandes([]);
+                }
                 setLoading(false);
-            } catch (error) {
-                console.error("Erreur lors du chargement des données:", error);
+            } catch (err) {
                 setLoading(false);
+                console.error("Erreur lors du chargement des commandes:", err);
             }
         };
-
-        loadUserData();
+        loadUserDataAndCommandes();
     }, []);    const handleMenuClick = (item) => {
         setActiveMenu(item.name);
         switch (item.name) {
@@ -140,15 +145,15 @@ const [note, setNote] = useState("");
     };
 
     const voirCommande = (commandeId) => {
-        const commande = commandes.find((cmd) => cmd.id === commandeId);
+        const commande = commandes.find((cmd) => cmd.idCommande === commandeId);
         if (commande) {
             const details = `
 Détails de la commande ${commandeId}:
-- Date: ${commande.date}
-- Status: ${commande.status}
-- Total: ${commande.total}€
-- Produits: ${commande.produits.join(", ")}
-- Adresse: ${commande.adresse}
+- Utilisateur: ${commande.idUtilisateur}
+- Produit: ${commande.idProduit}
+- Quantité: ${commande.quantite}
+- Prix unitaire: ${commande.prixAchat}€
+- Facture: ${commande.idFacture || 'N/A'}
             `;
             alert(details);
         }
@@ -164,6 +169,9 @@ Détails de la commande ${commandeId}:
     };
 
     const getStatusColor = (status) => {
+        if (!status || typeof status !== 'string') {
+            return "linear-gradient(135deg, #a0aec0, #718096)";
+        }
         switch (status.toLowerCase()) {
             case "livrée":
             case "livree":
@@ -182,6 +190,9 @@ Détails de la commande ${commandeId}:
     };
 
     const getStatusIcon = (status) => {
+        if (!status || typeof status !== 'string') {
+            return "⏳";
+        }
         switch (status.toLowerCase()) {
             case "livrée":
             case "livree":
@@ -625,235 +636,274 @@ Détails de la commande ${commandeId}:
                                 <p>Vos commandes apparaîtront ici une fois effectuées</p>
                             </div>
                         ) : (
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: "1.5rem",
-                                }}
-                            >
-                                {commandes.map((commande, index) => (
-                                    <div
-                                        key={index}
-                                        style={{
-                                            background: "#f8fdf8",
-                                            border: "2px solid #e8f5e8",
-                                            borderRadius: "16px",
-                                            padding: "2rem",
-                                            transition: "all 0.3s ease",
-                                            cursor: "pointer",
-                                        }}
-                                        onMouseOver={(e) => {
-                                            e.currentTarget.style.borderColor = "#a8c4a0";
-                                            e.currentTarget.style.transform = "translateY(-2px)";
-                                            e.currentTarget.style.boxShadow =
-                                                "0 8px 25px rgba(168, 196, 160, 0.2)";
-                                        }}
-                                        onMouseOut={(e) => {
-                                            e.currentTarget.style.borderColor = "#e8f5e8";
-                                            e.currentTarget.style.transform = "translateY(0)";
-                                            e.currentTarget.style.boxShadow = "none";
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                justifyContent: "space-between",
-                                                alignItems: "flex-start",
-                                                marginBottom: "1.5rem",
-                                            }}
-                                        >
-                                            <div style={{ flex: 1 }}>
-                                                <h3
-                                                    style={{
-                                                        fontSize: "1.3rem",
-                                                        fontWeight: "700",
-                                                        color: "#2c3e2d",
-                                                        marginBottom: "0.8rem",
-                                                    }}
-                                                >
-                                                    COMMANDE #{commande.id}
-                                                </h3>
-
-                                                <div
-                                                    style={{
-                                                        display: "grid",
-                                                        gridTemplateColumns:
-                                                            "repeat(auto-fit, minmax(200px, 1fr))",
-                                                        gap: "1rem",
-                                                        marginBottom: "1rem",
-                                                    }}
-                                                >
-                                                    <div>
-                                                        <span
-                                                            style={{
-                                                                fontSize: "0.85rem",
-                                                                color: "#7a8a77",
-                                                                fontWeight: "600",
-                                                                textTransform: "uppercase",
-                                                                letterSpacing: "0.5px",
-                                                            }}
-                                                        >
-                                                            📅 Date
-                                                        </span>
-                                                        <p
-                                                            style={{
-                                                                fontSize: "1rem",
-                                                                color: "#2c3e2d",
-                                                                fontWeight: "600",
-                                                                marginTop: "0.3rem",
-                                                            }}
-                                                        >
-                                                            {formatDate(commande.date)}
-                                                        </p>
-                                                    </div>
-
-                                                    <div>
-                                                        <span
-                                                            style={{
-                                                                fontSize: "0.85rem",
-                                                                color: "#7a8a77",
-                                                                fontWeight: "600",
-                                                                textTransform: "uppercase",
-                                                                letterSpacing: "0.5px",
-                                                            }}
-                                                        >
-                                                            💰 Total
-                                                        </span>
-                                                        <p
-                                                            style={{
-                                                                fontSize: "1.2rem",
-                                                                color: "#2c3e2d",
-                                                                fontWeight: "700",
-                                                                marginTop: "0.3rem",
-                                                            }}
-                                                        >
-                                                            {commande.total}€
-                                                        </p>
-                                                    </div>
-
-                                                    <div>
-                                                        <span
-                                                            style={{
-                                                                fontSize: "0.85rem",
-                                                                color: "#7a8a77",
-                                                                fontWeight: "600",
-                                                                textTransform: "uppercase",
-                                                                letterSpacing: "0.5px",
-                                                            }}
-                                                        >
-                                                            📍 Livraison
-                                                        </span>
-                                                        <p
-                                                            style={{
-                                                                fontSize: "1rem",
-                                                                color: "#5a6c57",
-                                                                marginTop: "0.3rem",
-                                                            }}
-                                                        >
-                                                            {commande.adresse || "Adresse non renseignée"}
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                <div style={{ marginBottom: "1rem" }}>
-                                                    <span
-                                                        style={{
-                                                            fontSize: "0.85rem",
-                                                            color: "#7a8a77",
-                                                            fontWeight: "600",
-                                                            textTransform: "uppercase",
-                                                            letterSpacing: "0.5px",
-                                                        }}
-                                                    >
-                                                        🛍️ Produits
-                                                    </span>
-                                                    <div
-                                                        style={{
-                                                            display: "flex",
-                                                            flexWrap: "wrap",
-                                                            gap: "0.5rem",
-                                                            marginTop: "0.5rem",
-                                                        }}
-                                                    >
-                                                        {commande.produits.map((produit, pIndex) => (
-                                                            <span
-                                                                key={pIndex}
-                                                                style={{
-                                                                    background: "rgba(168, 196, 160, 0.2)",
-                                                                    color: "#2c3e2d",
-                                                                    padding: "0.3rem 0.8rem",
-                                                                    borderRadius: "15px",
-                                                                    fontSize: "0.85rem",
-                                                                    fontWeight: "500",
-                                                                }}
-                                                            >
-                                                                {produit}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-
+                            <>
+                                {/* Commande la plus récente */}
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "1.5rem",
+                                    }}
+                                >
+                                    {(() => {
+                                        const sorted = [...commandes].sort((a, b) => new Date(b.date) - new Date(a.date));
+                                        const recent = sorted[0];
+                                        return (
                                             <div
+                                                key={recent.id || recent.idCommande}
                                                 style={{
-                                                    display: "flex",
-                                                    flexDirection: "column",
-                                                    alignItems: "flex-end",
-                                                    gap: "1rem",
+                                                    background: "#f8fdf8",
+                                                    border: "2px solid #e8f5e8",
+                                                    borderRadius: "16px",
+                                                    padding: "2rem",
+                                                    transition: "all 0.3s ease",
+                                                    cursor: "pointer",
+                                                }}
+                                                onMouseOver={(e) => {
+                                                    e.currentTarget.style.borderColor = "#a8c4a0";
+                                                    e.currentTarget.style.transform = "translateY(-2px)";
+                                                    e.currentTarget.style.boxShadow =
+                                                        "0 8px 25px rgba(168, 196, 160, 0.2)";
+                                                }}
+                                                onMouseOut={(e) => {
+                                                    e.currentTarget.style.borderColor = "#e8f5e8";
+                                                    e.currentTarget.style.transform = "translateY(0)";
+                                                    e.currentTarget.style.boxShadow = "none";
                                                 }}
                                             >
-                                                <span
+                                                {/* ... même contenu qu'avant pour une commande ... */}
+                                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.5rem" }}>
+                                                    <div style={{ flex: 1 }}>
+                                                        <h3 style={{ fontSize: "1.3rem", fontWeight: "700", color: "#2c3e2d", marginBottom: "0.8rem" }}>
+                                                            COMMANDE #{recent.id || recent.idCommande}
+                                                        </h3>
+                                                        <div style={{ fontSize: "0.95rem", color: "#7a8a77", marginBottom: "0.5rem" }}>
+                                                            <span><b>Facture :</b> {recent.idFacture || 'N/A'}</span> &nbsp;|
+                                                            <span><b>Statut :</b> {recent.status || 'N/A'}</span> &nbsp;|
+                                                            <span><b>ID utilisateur :</b> {recent.idUtilisateur}</span>
+                                                        </div>
+                                                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "1rem" }}>
+                                                            <div>
+                                                                <span style={{ fontSize: "0.85rem", color: "#7a8a77", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                                                                    📅 Date
+                                                                </span>
+                                                                <p style={{ fontSize: "1rem", color: "#2c3e2d", fontWeight: "600", marginTop: "0.3rem" }}>
+                                                                    {formatDate(recent.date)}
+                                                                </p>
+                                                            </div>
+                                                            <div>
+                                                                <span style={{ fontSize: "0.85rem", color: "#7a8a77", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                                                                    💰 Total
+                                                                </span>
+                                                                <p style={{ fontSize: "1.2rem", color: "#2c3e2d", fontWeight: "700", marginTop: "0.3rem" }}>
+                                                                    {recent.total}€
+                                                                </p>
+                                                            </div>
+                                                            <div>
+                                                                <span style={{ fontSize: "0.85rem", color: "#7a8a77", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                                                                    📍 Livraison
+                                                                </span>
+                                                                <p style={{ fontSize: "1rem", color: "#5a6c57", marginTop: "0.3rem" }}>
+                                                                    {recent.adresse || "Adresse non renseignée"}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div style={{ marginBottom: "1rem" }}>
+                                                            <span style={{ fontSize: "0.85rem", color: "#7a8a77", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                                                                🛍️ Produits
+                                                            </span>
+                                                            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.5rem" }}>
+                                                                {Array.isArray(recent.produits) && recent.produits.length > 0 ? (
+                                                                    recent.produits.map((produit, pIndex) => (
+                                                                        <span key={pIndex} style={{ background: "rgba(168, 196, 160, 0.2)", color: "#2c3e2d", padding: "0.3rem 0.8rem", borderRadius: "15px", fontSize: "0.85rem", fontWeight: "500" }}>
+                                                                            {typeof produit === 'string' ? produit : produit.nom || JSON.stringify(produit)}
+                                                                        </span>
+                                                                    ))
+                                                                ) : (
+                                                                    <span style={{ color: '#b0b0b0' }}>Aucun produit</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        {Array.isArray(recent.lignes) && recent.lignes.length > 0 && (
+                                                            <div style={{ marginTop: '0.5rem', fontSize: '0.95rem' }}>
+                                                                <b>Détail des produits :</b>
+                                                                <ul style={{ margin: 0, paddingLeft: '1.2em' }}>
+                                                                    {recent.lignes.map((ligne, lidx) => (
+                                                                        <li key={lidx}>
+                                                                            {ligne.nomProduit || ligne.produit?.nom || 'Produit'} x{ligne.quantite} à {ligne.prixAchat}€
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "1rem" }}>
+                                                        <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.6rem 1.2rem", borderRadius: "20px", fontSize: "0.9rem", fontWeight: "600", color: "white", background: getStatusColor(recent.status) }}>
+                                                            {getStatusIcon(recent.status)}
+                                                            {recent.status}
+                                                        </span>
+                                                        <button
+                                                            onClick={() => voirCommande(recent.id)}
+                                                            style={{ background: "linear-gradient(135deg, #a8c4a0, #8fb085)", color: "white", border: "none", padding: "0.8rem 1.5rem", borderRadius: "10px", cursor: "pointer", fontSize: "0.9rem", fontWeight: "600", boxShadow: "0 4px 12px rgba(168, 196, 160, 0.3)", transition: "all 0.3s ease", minWidth: "100px" }}
+                                                            onMouseOver={(e) => {
+                                                                e.target.style.transform = "translateY(-2px)";
+                                                                e.target.style.boxShadow = "0 6px 18px rgba(168, 196, 160, 0.4)";
+                                                            }}
+                                                            onMouseOut={(e) => {
+                                                                e.target.style.transform = "translateY(0)";
+                                                                e.target.style.boxShadow = "0 4px 12px rgba(168, 196, 160, 0.3)";
+                                                            }}
+                                                        >
+                                                            👁️ Voir détails
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+                                {/* Bouton voir plus */}
+                                {commandes.length > 1 && !showAllCommandes && (
+                                    <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+                                        <button
+                                            onClick={() => setShowAllCommandes(true)}
+                                            style={{
+                                                background: 'linear-gradient(135deg, #a8c4a0, #8fb085)',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '0.8rem 2rem',
+                                                borderRadius: '10px',
+                                                fontSize: '1rem',
+                                                fontWeight: '600',
+                                                cursor: 'pointer',
+                                                boxShadow: '0 4px 12px rgba(168, 196, 160, 0.3)',
+                                                transition: 'all 0.3s ease',
+                                            }}
+                                        >
+                                            Voir plus de commandes
+                                        </button>
+                                    </div>
+                                )}
+                                {/* Affichage des autres commandes si demandé */}
+                                {showAllCommandes && (
+                                    <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                        {(() => {
+                                            const sorted = [...commandes].sort((a, b) => new Date(b.date) - new Date(a.date));
+                                            return sorted.slice(1).map((commande) => (
+                                                <div
+                                                    key={commande.id || commande.idCommande}
                                                     style={{
-                                                        display: "inline-flex",
-                                                        alignItems: "center",
-                                                        gap: "0.5rem",
-                                                        padding: "0.6rem 1.2rem",
-                                                        borderRadius: "20px",
-                                                        fontSize: "0.9rem",
-                                                        fontWeight: "600",
-                                                        color: "white",
-                                                        background: getStatusColor(commande.status),
-                                                    }}
-                                                >
-                                                    {getStatusIcon(commande.status)}
-                                                    {commande.status}
-                                                </span>
-
-                                                <button
-                                                    onClick={() => voirCommande(commande.id)}
-                                                    style={{
-                                                        background:
-                                                            "linear-gradient(135deg, #a8c4a0, #8fb085)",
-                                                        color: "white",
-                                                        border: "none",
-                                                        padding: "0.8rem 1.5rem",
-                                                        borderRadius: "10px",
-                                                        cursor: "pointer",
-                                                        fontSize: "0.9rem",
-                                                        fontWeight: "600",
-                                                        boxShadow: "0 4px 12px rgba(168, 196, 160, 0.3)",
+                                                        background: "#f8fdf8",
+                                                        border: "2px solid #e8f5e8",
+                                                        borderRadius: "16px",
+                                                        padding: "2rem",
                                                         transition: "all 0.3s ease",
-                                                        minWidth: "100px",
+                                                        cursor: "pointer",
                                                     }}
                                                     onMouseOver={(e) => {
-                                                        e.target.style.transform = "translateY(-2px)";
-                                                        e.target.style.boxShadow =
-                                                            "0 6px 18px rgba(168, 196, 160, 0.4)";
+                                                        e.currentTarget.style.borderColor = "#a8c4a0";
+                                                        e.currentTarget.style.transform = "translateY(-2px)";
+                                                        e.currentTarget.style.boxShadow = "0 8px 25px rgba(168, 196, 160, 0.2)";
                                                     }}
                                                     onMouseOut={(e) => {
-                                                        e.target.style.transform = "translateY(0)";
-                                                        e.target.style.boxShadow =
-                                                            "0 4px 12px rgba(168, 196, 160, 0.3)";
+                                                        e.currentTarget.style.borderColor = "#e8f5e8";
+                                                        e.currentTarget.style.transform = "translateY(0)";
+                                                        e.currentTarget.style.boxShadow = "none";
                                                     }}
                                                 >
-                                                    👁️ Voir détails
-                                                </button>
-                                            </div>
-                                        </div>
+                                                    {/* ... même contenu qu'avant pour une commande ... */}
+                                                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.5rem" }}>
+                                                        <div style={{ flex: 1 }}>
+                                                            <h3 style={{ fontSize: "1.3rem", fontWeight: "700", color: "#2c3e2d", marginBottom: "0.8rem" }}>
+                                                                COMMANDE #{commande.id || commande.idCommande}
+                                                            </h3>
+                                                            <div style={{ fontSize: "0.95rem", color: "#7a8a77", marginBottom: "0.5rem" }}>
+                                                                <span><b>Facture :</b> {commande.idFacture || 'N/A'}</span> &nbsp;|
+                                                                <span><b>Statut :</b> {commande.status || 'N/A'}</span> &nbsp;|
+                                                                <span><b>ID utilisateur :</b> {commande.idUtilisateur}</span>
+                                                            </div>
+                                                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "1rem" }}>
+                                                                <div>
+                                                                    <span style={{ fontSize: "0.85rem", color: "#7a8a77", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                                                                        📅 Date
+                                                                    </span>
+                                                                    <p style={{ fontSize: "1rem", color: "#2c3e2d", fontWeight: "600", marginTop: "0.3rem" }}>
+                                                                        {formatDate(commande.date)}
+                                                                    </p>
+                                                                </div>
+                                                                <div>
+                                                                    <span style={{ fontSize: "0.85rem", color: "#7a8a77", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                                                                        💰 Total
+                                                                    </span>
+                                                                    <p style={{ fontSize: "1.2rem", color: "#2c3e2d", fontWeight: "700", marginTop: "0.3rem" }}>
+                                                                        {commande.total}€
+                                                                    </p>
+                                                                </div>
+                                                                <div>
+                                                                    <span style={{ fontSize: "0.85rem", color: "#7a8a77", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                                                                        📍 Livraison
+                                                                    </span>
+                                                                    <p style={{ fontSize: "1rem", color: "#5a6c57", marginTop: "0.3rem" }}>
+                                                                        {commande.adresse || "Adresse non renseignée"}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <div style={{ marginBottom: "1rem" }}>
+                                                                <span style={{ fontSize: "0.85rem", color: "#7a8a77", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                                                                    🛍️ Produits
+                                                                </span>
+                                                                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.5rem" }}>
+                                                                    {Array.isArray(commande.produits) && commande.produits.length > 0 ? (
+                                                                        commande.produits.map((produit, pIndex) => (
+                                                                            <span key={pIndex} style={{ background: "rgba(168, 196, 160, 0.2)", color: "#2c3e2d", padding: "0.3rem 0.8rem", borderRadius: "15px", fontSize: "0.85rem", fontWeight: "500" }}>
+                                                                                {typeof produit === 'string' ? produit : produit.nom || JSON.stringify(produit)}
+                                                                            </span>
+                                                                        ))
+                                                                    ) : (
+                                                                        <span style={{ color: '#b0b0b0' }}>Aucun produit</span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            {Array.isArray(commande.lignes) && commande.lignes.length > 0 && (
+                                                                <div style={{ marginTop: '0.5rem', fontSize: '0.95rem' }}>
+                                                                    <b>Détail des produits :</b>
+                                                                    <ul style={{ margin: 0, paddingLeft: '1.2em' }}>
+                                                                        {commande.lignes.map((ligne, lidx) => (
+                                                                            <li key={lidx}>
+                                                                                {ligne.nomProduit || ligne.produit?.nom || 'Produit'} x{ligne.quantite} à {ligne.prixAchat}€
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "1rem" }}>
+                                                            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.6rem 1.2rem", borderRadius: "20px", fontSize: "0.9rem", fontWeight: "600", color: "white", background: getStatusColor(commande.status) }}>
+                                                                {getStatusIcon(commande.status)}
+                                                                {commande.status}
+                                                            </span>
+                                                            <button
+                                                                onClick={() => voirCommande(commande.id)}
+                                                                style={{ background: "linear-gradient(135deg, #a8c4a0, #8fb085)", color: "white", border: "none", padding: "0.8rem 1.5rem", borderRadius: "10px", cursor: "pointer", fontSize: "0.9rem", fontWeight: "600", boxShadow: "0 4px 12px rgba(168, 196, 160, 0.3)", transition: "all 0.3s ease", minWidth: "100px" }}
+                                                                onMouseOver={(e) => {
+                                                                    e.target.style.transform = "translateY(-2px)";
+                                                                    e.target.style.boxShadow = "0 6px 18px rgba(168, 196, 160, 0.4)";
+                                                                }}
+                                                                onMouseOut={(e) => {
+                                                                    e.target.style.transform = "translateY(0)";
+                                                                    e.target.style.boxShadow = "0 4px 12px rgba(168, 196, 160, 0.3)";
+                                                                }}
+                                                            >
+                                                                👁️ Voir détails
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ));
+                                        })()}
                                     </div>
-                                ))}
-                            </div>
+                                )}
+                            </>
                         )}
 
                         {/* Footer de section */}

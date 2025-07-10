@@ -10,6 +10,7 @@ const PaiementConfirmer = () => {
     const location = useLocation();
     const params = new URLSearchParams(location.search);
     const numeroCommande = params.get('commande') || '...';
+    const numeroFacture = params.get('facture') || localStorage.getItem('idFacture') || '...';
 
     const handleRetourAccueil = () => {
         window.location.href = '/';
@@ -49,8 +50,10 @@ const PaiementConfirmer = () => {
                 {/* Titre principal */}
                 <h1 className="confirmation-title">Paiement Confirmé</h1>
 
-                {/* Sous-titre */}
+
+                {/* Sous-titre commande et facture */}
                 <p className="confirmation-subtitle">COMMANDE {numeroCommande}</p>
+                <p className="confirmation-subtitle" style={{fontSize:'18px', color:'#6a8c6a', marginTop:'-10px'}}>FACTURE {numeroFacture}</p>
 
                 {/* Message de confirmation */}
                 <div className="confirmation-message">
