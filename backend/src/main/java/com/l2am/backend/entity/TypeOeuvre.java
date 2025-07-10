@@ -23,4 +23,4 @@ public class TypeOeuvre {
     // Getters et setters sont générés par Lombok avec @Data
     
    
-}
+} 

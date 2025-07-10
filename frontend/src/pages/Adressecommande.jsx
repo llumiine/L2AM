@@ -16,18 +16,15 @@ const AdresseCommande = () => {
     const [showAllCommandes, setShowAllCommandes] = useState(false);
 
 
-    // Charger les données utilisateur et commandes
     useEffect(() => {
         const loadUserDataAndCommandes = async () => {
             try {
-                // Charger l'utilisateur connecté
                 const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
                 setUserData(currentUser);
                 setAdresse(currentUser.adresse || "");
                 setVille(currentUser.ville || "");
                 setCodePostal(currentUser.codePostal || "");
 
-                // Charger les commandes du backend pour cet utilisateur
                 if (currentUser.id) {
                     const token = localStorage.getItem("token");
                     const res = await fetch(`http://localhost:9090/api/commandes`, {
@@ -38,7 +35,6 @@ const AdresseCommande = () => {
                     });
                     if (!res.ok) throw new Error("Erreur lors du chargement des commandes");
                     const allCommandes = await res.json();
-                    // Filtrer les commandes de l'utilisateur connecté
                     const userCommandes = allCommandes.filter(cmd => cmd.idUtilisateur === currentUser.id);
                     setCommandes(userCommandes);
                 } else {
@@ -59,7 +55,7 @@ const AdresseCommande = () => {
                 navigate("/pageclient");
                 break;
             case "Déconnexion":
-                // Gérer la déconnexion ici si nécessaire
+     
                 break;
             default:
                 break;
@@ -83,7 +79,7 @@ const AdresseCommande = () => {
             },
             body: JSON.stringify({
                 idUtilisateur: userData.id,
-                idProduit: 1, // ou un vrai ID si tu l’as
+                idProduit: 1, 
                 commentaire: commentaire,
                 note: Number(note)
             })
@@ -762,7 +758,6 @@ Détails de la commande ${commandeId}:
                                         );
                                     })()}
                                 </div>
-                                {/* Bouton voir plus */}
                                 {commandes.length > 1 && !showAllCommandes && (
                                     <div style={{ textAlign: 'center', marginTop: '2rem' }}>
                                         <button

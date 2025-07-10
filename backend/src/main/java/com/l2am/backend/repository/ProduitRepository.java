@@ -16,7 +16,7 @@ public interface ProduitRepository extends JpaRepository<Produit, Long> {
     List<Produit> findByNomContainingIgnoreCase(String nom);
     List<Produit> findByStockGreaterThan(Integer stock);
     List<Produit> findByPrixBetween(BigDecimal prixMin, BigDecimal prixMax);
-    
+     
     @Query("SELECT p FROM Produit p WHERE p.nom LIKE %:terme% OR p.description LIKE %:terme%")
     List<Produit> rechercheGlobale(@Param("terme") String terme);
     

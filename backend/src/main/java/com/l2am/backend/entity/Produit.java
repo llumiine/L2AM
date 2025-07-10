@@ -18,7 +18,7 @@ public class Produit {
     @Column(name = "nom", length = 100, nullable = false)
     private String nom;
 
-    @Column(name = "prix", precision = 10, scale = 2, nullable = false)
+    @Column(name =  "prix", precision = 10, scale = 2, nullable = false)
     private BigDecimal prix;
 
     @Column(name = "stock")

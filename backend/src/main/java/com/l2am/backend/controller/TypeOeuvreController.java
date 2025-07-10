@@ -41,3 +41,4 @@ public class TypeOeuvreController {
         typeOeuvreService.deleteType(id);
     }
 }
+ 

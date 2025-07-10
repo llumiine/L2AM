@@ -20,7 +20,11 @@ const Gestionadmin = () => {
         image: '',
         taille: '',
         couleur: '',
-        typeLibelle: ''
+        typeLibelle: '',
+        idTypeOeuvre: '',      // AJOUTER
+        imageUrl: '',          // AJOUTER
+        poids: '',             // AJOUTER si utilisé
+        file: null             // AJOUTER si tu utilises l’upload fichier
     });
 
     const [categories, setCategories] = useState([]);
@@ -71,35 +75,46 @@ const Gestionadmin = () => {
 
     const handleAddProduct = async () => {
         try {
+            // Vérification obligatoire du type d'œuvre
+            if (!newProduct.idTypeOeuvre) {
+                alert('Veuillez sélectionner un type de produit.');
+                return;
+            }
             let formData;
             if (newProduct.file) {
                 formData = new FormData();
                 formData.append('file', newProduct.file);
                 formData.append('nom', newProduct.nom);
-                formData.append('categorie', newProduct.categorie);
                 formData.append('prix', parseFloat(newProduct.prix));
                 formData.append('stock', parseInt(newProduct.stock));
                 formData.append('description', newProduct.description);
                 formData.append('dimensions', newProduct.dimensions);
-                formData.append('typeLibelle', newProduct.typeLibelle);
-                const token = localStorage.getItem("token");
+                formData.append('couleur', newProduct.couleur);
+                formData.append('taille', newProduct.taille);
+                // On force l'envoi du typeLibelle correct
+                const type = categories.find(t => String(t.id_type_oeuvre) === String(newProduct.idTypeOeuvre));
+                if (type) {
+                    formData.append('typeLibelle', type.libelle);
+                } else {
+                    alert('Type de produit invalide.');
+                    return;
+                }
                 await axios.post('http://localhost:9090/api/produits', formData, {
-                    headers: { 
-                        'Content-Type': 'multipart/form-data',
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: { 'Content-Type': 'multipart/form-data' }
                 });
             } else {
+                // Pour le POST sans image, on envoie l'objet typeOeuvre avec idType
                 const productData = {
                     nom: newProduct.nom,
-                    categorie: newProduct.categorie,
                     prix: parseFloat(newProduct.prix),
                     stock: parseInt(newProduct.stock),
                     description: newProduct.description,
-                    imageUrl: newProduct.imageUrl,
+                    image: newProduct.imageUrl,
                     dimensions: newProduct.dimensions,
                     poids: newProduct.poids,
-                    typeLibelle: newProduct.typeLibelle
+                    couleur: newProduct.couleur,
+                    taille: newProduct.taille,
+                    typeOeuvre: newProduct.idTypeOeuvre ? { idType: parseInt(newProduct.idTypeOeuvre) } : undefined
                 };
                 await axios.post('http://localhost:9090/api/produits', productData);
             }
@@ -119,25 +134,37 @@ const Gestionadmin = () => {
 
     const handleUpdateProduct = async () => {
         try {
-            const productData = {
-                id: editingProduct,
-                nom: newProduct.nom,
-                categorie: newProduct.categorie,
-                prix: parseFloat(newProduct.prix),
-                stock: parseInt(newProduct.stock),
-                description: newProduct.description,
-                image: newProduct.imageUrl,
-                dimensions: newProduct.dimensions,
-                poids: newProduct.poids,
-                couleur: newProduct.couleur,
-                taille: newProduct.taille,
-                // C'est ici la clé !
-                typeOeuvre: {
-                    idType: newProduct.idTypeOeuvre // <-- il faut un id numérique ici !
-                }
-            };
-
-            await axios.put(`http://localhost:9090/api/produits/${editingProduct}`, productData);
+            if (!newProduct.idTypeOeuvre) {
+                alert('Veuillez sélectionner un type de produit.');
+                return;
+            }
+            // Toujours utiliser FormData pour la mise à jour (PUT)
+            const formData = new FormData();
+            formData.append('nom', newProduct.nom);
+            formData.append('prix', parseFloat(newProduct.prix));
+            formData.append('stock', parseInt(newProduct.stock));
+            formData.append('description', newProduct.description);
+            formData.append('dimensions', newProduct.dimensions);
+            formData.append('couleur', newProduct.couleur);
+            formData.append('taille', newProduct.taille);
+            formData.append('poids', newProduct.poids);
+            // On force l'envoi du typeLibelle correct
+            const type = categories.find(t => String(t.id_type_oeuvre) === String(newProduct.idTypeOeuvre));
+            if (type) {
+                formData.append('typeLibelle', type.libelle);
+            } else {
+                alert('Type de produit invalide.');
+                return;
+            }
+            // Si un fichier est sélectionné, on l'ajoute
+            if (newProduct.file) {
+                formData.append('file', newProduct.file);
+            }
+            await axios.put(
+                `http://localhost:9090/api/produits/${editingProduct.id}`,
+                formData,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            );
             fetchProducts();
             setShowAddForm(false);
             setEditingProduct(null);
@@ -188,9 +215,14 @@ const Gestionadmin = () => {
             stock: 0,
             description: '',
             dimensions: '',
-            poids: '',  // Changé de weight
+            image: '',
+            taille: '',
+            couleur: '',
+            typeLibelle: '',
+            idTypeOeuvre: '',
             imageUrl: '',
-            typeLibelle: '' // Ajouté pour le type de produit
+            poids: '',
+            file: null
         });
         setEditingProduct(null);
         setShowAddForm(false);
@@ -208,8 +240,19 @@ const Gestionadmin = () => {
     const handleEditProduct = (productId) => {
         const product = products.find(p => p.id === productId);
         if (product) {
-            setEditingProduct(productId);
+            setEditingProduct(product);
             setShowAddForm(true);
+            // Correction ici : toujours générer une URL exploitable pour imageUrl
+            let imageUrl = '';
+            if (product.imageUrl) {
+                imageUrl = product.imageUrl.startsWith('http')
+                    ? product.imageUrl
+                    : `http://localhost:9090/images/${product.imageUrl}`;
+            } else if (product.image) {
+                imageUrl = product.image.startsWith('http')
+                    ? product.image
+                    : `http://localhost:9090/images/${product.image}`;
+            }
             setNewProduct({
                 nom: product.nom || '',
                 categorie: product.categorie || '',
@@ -218,17 +261,10 @@ const Gestionadmin = () => {
                 description: product.description || '',
                 dimensions: product.dimensions || '',
                 poids: product.poids || '',
-                imageUrl: product.imageUrl 
-                    ? (product.imageUrl.startsWith('http') 
-                        ? product.imageUrl 
-                        : `http://localhost:9090/images/${product.imageUrl}`)
-                    : (product.image 
-                        ? (product.image.startsWith('http') 
-                            ? product.image 
-                            : `http://localhost:9090/images/${product.image}`) 
-                        : ''),
+                imageUrl: imageUrl,
                 typeLibelle: product.typeLibelle || '',
-                file: null 
+                idTypeOeuvre: product.idTypeOeuvre || (product.typeOeuvre && product.typeOeuvre.idType) || '',
+                file: null
             });
         }
     };
@@ -622,11 +658,11 @@ const Gestionadmin = () => {
                                 color: '#2c3e2d',
                                 marginBottom: '0.5rem'
                             }}>
-                                Type de produit
+                                Type de produit *
                             </label>
                             <select
-                                value={newProduct.typeLibelle}
-                                onChange={e => setNewProduct({ ...newProduct, typeLibelle: e.target.value })}
+                                value={newProduct.idTypeOeuvre === undefined || newProduct.idTypeOeuvre === null ? '' : String(newProduct.idTypeOeuvre)}
+                                onChange={e => setNewProduct({ ...newProduct, idTypeOeuvre: e.target.value })}
                                 style={{
                                     width: '100%',
                                     padding: '0.8rem',
@@ -635,10 +671,11 @@ const Gestionadmin = () => {
                                     fontSize: '1rem',
                                     backgroundColor: 'white'
                                 }}
+                                required
                             >
                                 <option value="">Sélectionner un type</option>
-                                {categories.map(type => (
-                                    <option key={type.id_type_oeuvre} value={type.libelle}>
+                                {categories && categories.length > 0 && categories.map((type, idx) => (
+                                    <option key={type.id_type_oeuvre ?? idx} value={String(type.id_type_oeuvre)}>
                                         {type.libelle}
                                     </option>
                                 ))}
@@ -670,7 +707,6 @@ const Gestionadmin = () => {
                                         width: '100%',
                                         padding: '0.8rem',
                                         border: '2px solid #e8f5e8',
-                                        borderRadius: '10px',
                                         fontSize: '1rem'
                                     }}
                                     placeholder="https://exemple.com/mon-image.jpg"

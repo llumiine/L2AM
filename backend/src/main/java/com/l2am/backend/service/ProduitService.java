@@ -20,7 +20,7 @@ public class ProduitService {
 
     @Autowired
     private TypeOeuvreRepository typeOeuvreRepository;
-
+ 
     public Produit creerProduit(Produit produit) {
         return produitRepository.save(produit);
     }
@@ -132,5 +132,9 @@ public TypeOeuvre findTypeOeuvreByLibelle(String libelle) {
 
     public Optional<Produit> getProduitById(Long id) {
         return produitRepository.findById(id);
+    }
+
+    public TypeOeuvre getTypeOeuvreById(Long id) {
+        return typeOeuvreRepository.findById(id).orElse(null);
     }
 }
