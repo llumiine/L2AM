@@ -5,7 +5,7 @@ export default function Footer() {
   return (
       <footer className="footer">
         <div className="footer-content">
-          {/* Colonne 1 - Logo et réseaux sociaux */}
+          
           <div className="footer-brand">
             <h4 className="brand-title">L2am'Zzz.</h4>
             <div className="social-icons">
@@ -32,7 +32,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Colonne 2 - Navigation principale */}
+          
           <div className="footer-column">
             <h4 className="column-title">Navigation principale</h4>
             <ul className="footer-links">
@@ -44,7 +44,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Colonne 3 - Informations importantes */}
+          
           <div className="footer-column">
             <h4 className="column-title">Information importantes</h4>
             <ul className="footer-links">
@@ -54,7 +54,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Colonne 4 - Paiements & Sécurité */}
+          
           <div className="footer-column">
             <h4 className="column-title">Paiements & Sécurité</h4>
             <ul className="footer-links">

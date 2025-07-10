@@ -69,7 +69,7 @@ const Admin = () => {
             fontFamily: 'system-ui, -apple-system, sans-serif',
             backgroundColor: '#f8f9fa'
         }}>
-            {/* Sidebar avec style DA */}
+            
             <div style={{
                 width: '300px',
                 background: 'linear-gradient(135deg, #a8c4a0, #8fb085)',
@@ -157,7 +157,7 @@ const Admin = () => {
                     ))}
                 </nav>
 
-                {/* Stats rapides sidebar */}
+                
                 <div style={{
                     marginTop: '3rem',
                     padding: '1.5rem',
@@ -206,12 +206,12 @@ const Admin = () => {
                 </div>
             </div>
 
-            {/* Main Content avec style DA */}
+            
             <div style={{
                 flex: 1,
                 padding: '3rem'
             }}>
-                {/* Header */}
+                
                 <div style={{
                     marginBottom: '3rem'
                 }}>
@@ -233,7 +233,7 @@ const Admin = () => {
                     </p>
                 </div>
 
-                {/* Dashboard Cards avec style DA */}
+                
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -353,7 +353,7 @@ const Admin = () => {
                     </div>
                 </div>
 
-                {/* Orders Table avec style DA */}
+                
                 <div style={{
                     background: 'white',
                     borderRadius: '20px',
@@ -623,7 +623,7 @@ const Admin = () => {
                         </table>
                     </div>
 
-                    {/* Détails de commande */}
+                    
                     {showOrderDetails !== null && (
                         <div style={{
                             background: '#f8fdf8',

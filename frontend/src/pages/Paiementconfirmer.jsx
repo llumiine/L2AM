@@ -1,18 +1,23 @@
 import React from 'react';
-import '../styles/Paiementconfirmer.css'; // Correction du chemin d'importation
+import { useLocation } from "react-router-dom";
+import '../styles/Paiementconfirmer.css';
 
 const PaiementConfirmer = () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const prenom = user?.prenom || 'Client';
+
+    const location = useLocation();
+    const params = new URLSearchParams(location.search);
+    const numeroCommande = params.get('commande') || '...';
+    const numeroFacture = params.get('facture') || localStorage.getItem('idFacture') || '...';
+
     const handleRetourAccueil = () => {
-        // Redirection vers la page d'accueil
-        console.log('Retour à la page d\'accueil');
-        // window.location.href = '/';
-        alert('Redirection vers la page d\'accueil');
+        window.location.href = '/';
     };
 
     return (
         <div className="confirmation-container">
             <div className="confirmation-card">
-                {/* Icône de confirmation */}
                 <div className="check-icon">
                     <svg
                         width="80"
@@ -40,23 +45,20 @@ const PaiementConfirmer = () => {
                     </svg>
                 </div>
 
-                {/* Titre principal */}
                 <h1 className="confirmation-title">Paiement Confirmé</h1>
 
-                {/* Sous-titre */}
-                <p className="confirmation-subtitle">COMMANDE 20155</p>
 
-                {/* Message de confirmation */}
+                <p className="confirmation-subtitle">COMMANDE {numeroCommande}</p>
+                <p className="confirmation-subtitle" style={{fontSize:'18px', color:'#6a8c6a', marginTop:'-10px'}}>FACTURE {numeroFacture}</p>
+
                 <div className="confirmation-message">
                     <p>
-                        Merci Marthe d'avoir acheté chez Learn'Eat. Maintenant que votre
-                        commande est confirmée, elle vous sera d'être expédiée sous 3
-                        à 4 jours ouvrables. Nous vous tiendrons informé jusqu'à jour du
-                        mises à jour de votre commande.
+                        Merci {prenom} d'avoir acheté chez L2AM Studio. Maintenant que votre
+                        commande est confirmée, elle vous sera expédiée sous 3
+                        à 4 jours ouvrables. Nous vous tiendrons informé des mises à jour de votre commande.
                     </p>
                 </div>
 
-                {/* Bouton de retour */}
                 <button
                     onClick={handleRetourAccueil}
                     className="retour-button"

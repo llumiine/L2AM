@@ -1,9 +1,45 @@
-import React from "react";
-import { Link } from "react-router-dom"; // Ajoutez cet import
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import "../styles/Login.css";
-import cakeImg from "../assets/fraise.png"; // Assurez-vous que ce fichier existe
+import cakeImg from "../assets/fraise.png";
 
 const Login = () => {
+  const [email, setEmail] = useState("");
+  const [mdp, setMdp] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post("http://localhost:9090/api/auth/login", {
+        email,
+        mdp,
+      });
+
+      const utilisateur = response.data.utilisateur;
+      
+      
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(utilisateur));
+      
+      
+      if (utilisateur.role === 1) {
+        console.log("Connexion admin réussie");
+        navigate("/gestionadmin");
+      } else {
+        console.log("Connexion utilisateur réussie");
+        navigate("/pageclient");
+      }
+
+    } catch (error) {
+      console.error("Erreur de connexion :", error);
+      alert("Email ou mot de passe incorrect");
+    }
+  };
+
   return (
     <div className="login-page">
       <div className="login-left">
@@ -11,14 +47,35 @@ const Login = () => {
       </div>
       <div className="login-right">
         <h2>Connexion</h2>
-        <form className="login-form">
+        <form className="login-form" onSubmit={handleSubmit}>
           <label>
             Mail
-            <input type="email" placeholder="Value" />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="Votre email"
+            />
           </label>
           <label>
             Mot de passe
-            <input type="password" placeholder="Value" />
+            <div className="password-field">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={mdp}
+                onChange={(e) => setMdp(e.target.value)}
+                required
+                placeholder="Votre mot de passe"
+                className="password-input"
+              />
+              <span
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? "👁️" : "👁️‍🗨️"}
+              </span>
+            </div>
           </label>
           <div className="login-forgot">
             <a href="#">Mot de passe oublié ?</a>
@@ -26,7 +83,8 @@ const Login = () => {
           <button type="submit">Connexion</button>
         </form>
         <p className="login-register">
-          Tu n'as pas de compte ? <Link to="/register">Inscris-toi maintenant</Link>
+          Tu n'as pas de compte ?{" "}
+          <Link to="/register">Inscris-toi maintenant</Link>
         </p>
       </div>
     </div>

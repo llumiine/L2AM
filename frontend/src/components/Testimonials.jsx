@@ -1,74 +1,75 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import "../styles/Testimonials.css";
 
-const testimonials = [
-  {
-    id: 1,
-    name: "Sarah",
-    rating: 4,
-    date: "01/03/2025"
-  },
-  {
-    id: 2,
-    name: "Milena",
-    rating: 5,
-    date: "05/01/2025"
-  },
-  {
-    id: 3,
-    name: "Catherine",
-    rating: 5,
-    date: "16/12/2024"
-  },
-  {
-    id: 4,
-    name: "Michael Jackson",
-    rating: 5,
-    date: "23/11/2024"
-  }
-];
-
 export default function Testimonials() {
+  const [commentaires, setCommentaires] = useState([]);
+
+ useEffect(() => {
+  const timestamp = Date.now();
+  fetch(`http://localhost:9090/api/commentaires/avec-utilisateur?t=${timestamp}`)
+    .then(res => res.json())
+    .then(data => {
+      console.log("Données reçues:", data);
+      setCommentaires(data);
+    })
+    .catch(err => console.error("Erreur chargement commentaires:", err));
+}, []);
+
   const renderStars = (rating) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      if (i <= rating) {
-        stars.push(<span key={i} className="star filled">★</span>);
-      } else {
-        stars.push(<span key={i} className="star empty">★</span>);
-      }
+    return [...Array(5)].map((_, i) => (
+      <span key={i} className={`star ${i < rating ? 'filled' : 'empty'}`}>★</span>
+    ));
+  };
+
+  
+  const getNomComplet = (commentaire) => {
+    if (commentaire.prenomUtilisateur && commentaire.nomUtilisateur) {
+      return `${commentaire.prenomUtilisateur} ${commentaire.nomUtilisateur}`;
     }
-    return stars;
+    return commentaire.nomUtilisateur || "Utilisateur anonyme";
+  };
+
+  const getInitiale = (commentaire) => {
+    if (commentaire.prenomUtilisateur) {
+      return commentaire.prenomUtilisateur.charAt(0).toUpperCase();
+    }
+    if (commentaire.nomUtilisateur) {
+      return commentaire.nomUtilisateur.charAt(0).toUpperCase();
+    }
+    return 'U';
   };
 
   return (
-      <section className="testimonials-section">
-        <div className="testimonials-container">
-          <h2 className="testimonials-title">Que disent mes Stars ✨</h2>
+    <section className="testimonials-section">
+      <div className="testimonials-container">
+        <h2 className="testimonials-title">Que disent mes Stars ✨</h2>
 
-          <div className="testimonials-grid">
-            {testimonials.map((testimonial) => (
-                <div key={testimonial.id} className="testimonial-card">
-                  <div className="stars-row">
-                    {renderStars(testimonial.rating)}
+        <div className="testimonials-grid">
+          {commentaires.length === 0 ? (
+            <p>Aucun commentaire pour le moment.</p>
+          ) : (
+            commentaires.slice(-4).reverse().map((c) => (
+              <div key={c.id} className="testimonial-card">
+                <div className="stars-row">
+                  {renderStars(c.note)}
+                </div>
+
+                <h3 className="card-title">Avis client</h3>
+                <p className="card-subtitle">{c.commentaire}</p>
+
+                <div className="profile-section">
+                  <div className="profile-avatar">
+                    <span>{getInitiale(c)}</span>
                   </div>
-
-                  <h3 className="card-title">Review title</h3>
-                  <p className="card-subtitle">Review body</p>
-
-                  <div className="profile-section">
-                    <div className="profile-avatar">
-                      <span>{testimonial.name.charAt(0)}</span>
-                    </div>
-                    <div className="profile-text">
-                      <div className="profile-name">{testimonial.name}</div>
-                      <div className="profile-date">{testimonial.date}</div>
-                    </div>
+                  <div className="profile-text">
+                    <div className="profile-name">{getNomComplet(c)}</div>
                   </div>
                 </div>
-            ))}
-          </div>
+              </div>
+            ))
+          )}
         </div>
-      </section>
+      </div>
+    </section>
   );
 }

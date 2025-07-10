@@ -5,7 +5,7 @@ export default function About() {
   return (
       <section className="about-section">
         <div className="about-container">
-          {/* Image */}
+          
           <div className="about-image">
             <img
                 src={aboutImage}
@@ -13,7 +13,7 @@ export default function About() {
             />
           </div>
 
-          {/* Texte */}
+          
           <div className="about-text">
             <h2>À propos de moi</h2>
             <h3>Les murmures de l'âme et des couleurs</h3>

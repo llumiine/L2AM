@@ -1,183 +1,201 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const Gestionadmin = () => {
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // États existants
     const [showAddForm, setShowAddForm] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
     const [showProductDetails, setShowProductDetails] = useState(null);
-    
-    const [products, setProducts] = useState([
-        {
-            id: 'P001',
-            name: 'Trésor suspendu',
-            category: 'Bijoux',
-            price: 25,
-            stock: 12,
-            description: 'Magnifique pendentif artisanal en argile peinte à la main avec des motifs délicats.',
-            image: '🎨',
-            imageUrl: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400',
-            status: 'Disponible',
-            dateAdded: '2023-08-15',
-            materials: ['Argile', 'Peinture acrylique', 'Vernis'],
-            dimensions: '5cm x 3cm',
-            weight: '15g'
-        },
-        {
-            id: 'P002',
-            name: 'Porte-bijoux',
-            category: 'Accessoires',
-            price: 18,
-            stock: 8,
-            description: 'Porte-bijoux pratique et élégant, parfait pour organiser vos précieux accessoires.',
-            image: '💍',
-            imageUrl: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=400',
-            status: 'Disponible',
-            dateAdded: '2023-08-20',
-            materials: ['Bois', 'Feutrine'],
-            dimensions: '15cm x 10cm x 8cm',
-            weight: '120g'
-        },
-        {
-            id: 'P003',
-            name: 'Création personnalisée',
-            category: 'Sur mesure',
-            price: 35,
-            stock: 0,
-            description: 'Pièce unique créée selon vos désirs et spécifications.',
-            image: '✨',
-            imageUrl: 'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=400',
-            status: 'Sur commande',
-            dateAdded: '2023-09-01',
-            materials: ['Variables selon demande'],
-            dimensions: 'Variables',
-            weight: 'Variable'
-        },
-        {
-            id: 'P004',
-            name: 'Porte-bijoux argile',
-            category: 'Accessoires',
-            price: 22,
-            stock: 5,
-            description: 'Porte-bijoux en argile avec finitions artisanales et compartiments multiples.',
-            image: '🏺',
-            imageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400',
-            status: 'Stock faible',
-            dateAdded: '2023-08-25',
-            materials: ['Argile', 'Émaux colorés'],
-            dimensions: '12cm x 8cm x 6cm',
-            weight: '200g'
-        }
-    ]);
-
     const [newProduct, setNewProduct] = useState({
-        name: '',
-        category: '',
-        price: '',
-        stock: '',
+        nom: '',
+        categorie: '',
+        prix: '',
+        stock: 0,
         description: '',
-        materials: '',
         dimensions: '',
-        weight: '',
-        imageUrl: ''
+        image: '',
+        taille: '',
+        couleur: '',
+        typeLibelle: '',
+        idTypeOeuvre: '',      // AJOUTER
+        imageUrl: '',          // AJOUTER
+        poids: '',             // AJOUTER si utilisé
+        file: null             // AJOUTER si tu utilises l’upload fichier
     });
 
-    const categories = ['Bijoux', 'Accessoires', 'Sur mesure', 'Décoration'];
+    const [categories, setCategories] = useState([]);
 
-    const handleAddProduct = () => {
-        if (newProduct.name && newProduct.category && newProduct.price) {
-            const product = {
-                id: `P${String(products.length + 1).padStart(3, '0')}`,
-                name: newProduct.name,
-                category: newProduct.category,
-                price: parseFloat(newProduct.price),
-                stock: parseInt(newProduct.stock) || 0,
-                description: newProduct.description,
-                image: '🎨',
-                imageUrl: newProduct.imageUrl,
-                status: parseInt(newProduct.stock) > 0 ? 'Disponible' : 'Rupture de stock',
-                dateAdded: new Date().toISOString().split('T')[0],
-                materials: newProduct.materials.split(',').map(m => m.trim()).filter(m => m),
-                dimensions: newProduct.dimensions,
-                weight: newProduct.weight
-            };
-            
-            setProducts([...products, product]);
-            setNewProduct({
-                name: '',
-                category: '',
-                price: '',
-                stock: '',
-                description: '',
-                materials: '',
-                dimensions: '',
-                weight: '',
-                imageUrl: ''
-            });
-            setShowAddForm(false);
+
+    useEffect(() => {
+        fetchProducts();
+        fetchCategories();
+    }, []);
+
+    const fetchProducts = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get('http://localhost:9090/api/produits');
+            const produitsAvecStatut = response.data.map(produit => ({
+                ...produit,
+                status: getProductStatus(produit.stock)
+            }));
+            setProducts(produitsAvecStatut);
+        } catch (err) {
+            setError("Erreur lors du chargement des produits");
+            console.error("Erreur:", err);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleEditProduct = (productId) => {
-        const product = products.find(p => p.id === productId);
-        if (product) {
-            setNewProduct({
-                name: product.name,
-                category: product.category,
-                price: product.price.toString(),
-                stock: product.stock.toString(),
-                description: product.description,
-                materials: product.materials.join(', '),
-                dimensions: product.dimensions,
-                weight: product.weight,
-                imageUrl: product.imageUrl || ''
-            });
-            setEditingProduct(productId);
-            setShowAddForm(true);
-        }
+    const getProductStatus = (stock) => {
+        if (stock === 0) return 'Rupture de stock';
+        if (stock <= 5) return 'Stock faible';
+        return 'Disponible';
     };
 
-    const handleUpdateProduct = () => {
-        if (editingProduct && newProduct.name && newProduct.category && newProduct.price) {
-            const updatedProducts = products.map(product => {
-                if (product.id === editingProduct) {
-                    return {
-                        ...product,
-                        name: newProduct.name,
-                        category: newProduct.category,
-                        price: parseFloat(newProduct.price),
-                        stock: parseInt(newProduct.stock) || 0,
-                        description: newProduct.description,
-                        status: parseInt(newProduct.stock) > 0 ? 'Disponible' : 'Rupture de stock',
-                        imageUrl: newProduct.imageUrl,
-                        materials: newProduct.materials.split(',').map(m => m.trim()).filter(m => m),
-                        dimensions: newProduct.dimensions,
-                        weight: newProduct.weight
-                    };
+    const fetchCategories = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get("http://localhost:9090/api/types", {
+                headers: {
+                    Authorization: `Bearer ${token}`
                 }
-                return product;
             });
-            
-            setProducts(updatedProducts);
-            setNewProduct({
-                name: '',
-                category: '',
-                price: '',
-                stock: '',
-                description: '',
-                materials: '',
-                dimensions: '',
-                weight: '',
-                imageUrl: ''
-            });
-            setEditingProduct(null);
-            setShowAddForm(false);
+            console.log("Réponse API types :", response.data);
+            setCategories(response.data);
+        } catch (err) {
+            console.error("Erreur lors du chargement des types d'oeuvre:", err);
         }
     };
 
-    const handleDeleteProduct = (productId) => {
-        if (window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-            setProducts(products.filter(p => p.id !== productId));
+    const handleAddProduct = async () => {
+        try {
+            // Vérification obligatoire du type d'œuvre
+            if (!newProduct.idTypeOeuvre) {
+                alert('Veuillez sélectionner un type de produit.');
+                return;
+            }
+            let formData;
+            if (newProduct.file) {
+                formData = new FormData();
+                formData.append('file', newProduct.file);
+                formData.append('nom', newProduct.nom);
+                formData.append('prix', parseFloat(newProduct.prix));
+                formData.append('stock', parseInt(newProduct.stock));
+                formData.append('description', newProduct.description);
+                formData.append('dimensions', newProduct.dimensions);
+                formData.append('couleur', newProduct.couleur);
+                formData.append('taille', newProduct.taille);
+                // On force l'envoi du typeLibelle correct
+                const type = categories.find(t => String(t.id_type_oeuvre) === String(newProduct.idTypeOeuvre));
+                if (type) {
+                    formData.append('typeLibelle', type.libelle);
+                } else {
+                    alert('Type de produit invalide.');
+                    return;
+                }
+                await axios.post('http://localhost:9090/api/produits', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+            } else {
+                // Pour le POST sans image, on envoie l'objet typeOeuvre avec idType
+                const productData = {
+                    nom: newProduct.nom,
+                    prix: parseFloat(newProduct.prix),
+                    stock: parseInt(newProduct.stock),
+                    description: newProduct.description,
+                    image: newProduct.imageUrl,
+                    dimensions: newProduct.dimensions,
+                    poids: newProduct.poids,
+                    couleur: newProduct.couleur,
+                    taille: newProduct.taille,
+                    typeOeuvre: newProduct.idTypeOeuvre ? { idType: parseInt(newProduct.idTypeOeuvre) } : undefined
+                };
+                await axios.post('http://localhost:9090/api/produits', productData);
+            }
+            fetchProducts();
+            setShowAddForm(false);
+            resetForm();
+            alert('✅ Produit ajouté avec succès !');
+        } catch (err) {
+            // Ajout du log détaillé
+            console.error("Erreur lors de l'ajout du produit (détail complet):", err);
+            if (err.response) {
+                console.error("Réponse backend:", err.response.data);
+            }
+            alert("❌ Erreur lors de l'ajout du produit");
         }
     };
+
+    const handleUpdateProduct = async () => {
+        try {
+            if (!newProduct.idTypeOeuvre) {
+                alert('Veuillez sélectionner un type de produit.');
+                return;
+            }
+            // Toujours utiliser FormData pour la mise à jour (PUT)
+            const formData = new FormData();
+            formData.append('nom', newProduct.nom);
+            formData.append('prix', parseFloat(newProduct.prix));
+            formData.append('stock', parseInt(newProduct.stock));
+            formData.append('description', newProduct.description);
+            formData.append('dimensions', newProduct.dimensions);
+            formData.append('couleur', newProduct.couleur);
+            formData.append('taille', newProduct.taille);
+            formData.append('poids', newProduct.poids);
+            // On force l'envoi du typeLibelle correct
+            const type = categories.find(t => String(t.id_type_oeuvre) === String(newProduct.idTypeOeuvre));
+            if (type) {
+                formData.append('typeLibelle', type.libelle);
+            } else {
+                alert('Type de produit invalide.');
+                return;
+            }
+            // Si un fichier est sélectionné, on l'ajoute
+            if (newProduct.file) {
+                formData.append('file', newProduct.file);
+            }
+            await axios.put(
+                `http://localhost:9090/api/produits/${editingProduct.id}`,
+                formData,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            );
+            fetchProducts();
+            setShowAddForm(false);
+            setEditingProduct(null);
+            resetForm();
+        } catch (err) {
+            console.error("Erreur lors de la mise à jour:", err);
+            if (err.response) {
+                console.error("Réponse backend:", err.response.data);
+            }
+            alert("Erreur lors de la mise à jour du produit");
+        }
+    };
+
+    // Suppression d'un produit
+    const handleDeleteProduct = async (productId) => {
+        if (window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+            try {
+                await axios.delete(`http://localhost:9090/api/produits/${productId}`);
+                fetchProducts();
+            } catch (err) {
+                console.error("Erreur lors de la suppression:", err);
+                alert("Erreur lors de la suppression du produit");
+            }
+        }
+    };
+
+    // Statistiques
+    const totalProducts = products.length;
+    const availableProducts = products.filter(p => p.stock > 5).length;
+    const lowStockProducts = products.filter(p => p.stock > 0 && p.stock <= 5).length;
+    const outOfStockProducts = products.filter(p => p.stock === 0).length;
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -189,25 +207,79 @@ const Gestionadmin = () => {
         }
     };
 
-    const totalProducts = products.length;
-    const availableProducts = products.filter(p => p.status === 'Disponible').length;
-    const lowStockProducts = products.filter(p => p.status === 'Stock faible').length;
-    const outOfStockProducts = products.filter(p => p.status === 'Rupture de stock').length;
-
     const resetForm = () => {
         setNewProduct({
-            name: '',
-            category: '',
-            price: '',
-            stock: '',
+            nom: '',
+            categorie: '',
+            prix: '',
+            stock: 0,
             description: '',
-            materials: '',
             dimensions: '',
-            weight: '',
-            imageUrl: ''
+            image: '',
+            taille: '',
+            couleur: '',
+            typeLibelle: '',
+            idTypeOeuvre: '',
+            imageUrl: '',
+            poids: '',
+            file: null
         });
         setEditingProduct(null);
         setShowAddForm(false);
+    };
+
+    // Affichage du chargement
+    if (loading) {
+        return <div className="loading">Chargement des produits...</div>;
+    }
+
+    if (error) {
+        return <div className="error">{error}</div>;
+    }
+
+    const handleEditProduct = (productId) => {
+        const product = products.find(p => p.id === productId);
+        if (product) {
+            setEditingProduct(product);
+            setShowAddForm(true);
+            // Correction ici : toujours générer une URL exploitable pour imageUrl
+            let imageUrl = '';
+            if (product.imageUrl) {
+                imageUrl = product.imageUrl.startsWith('http')
+                    ? product.imageUrl
+                    : `http://localhost:9090/images/${product.imageUrl}`;
+            } else if (product.image) {
+                imageUrl = product.image.startsWith('http')
+                    ? product.image
+                    : `http://localhost:9090/images/${product.image}`;
+            }
+            setNewProduct({
+                nom: product.nom || '',
+                categorie: product.categorie || '',
+                prix: product.prix || '',
+                stock: product.stock || 0,
+                description: product.description || '',
+                dimensions: product.dimensions || '',
+                poids: product.poids || '',
+                imageUrl: imageUrl,
+                typeLibelle: product.typeLibelle || '',
+                idTypeOeuvre: product.idTypeOeuvre || (product.typeOeuvre && product.typeOeuvre.idType) || '',
+                file: null
+            });
+        }
+    };
+
+    // Nouvelle fonction de fallback inspirée de ProductGrid
+    // (Supprimée car doublon plus bas)
+
+    // Améliore getImageUrl pour gérer image ET imageUrl
+    const getImageUrl = (product) => {
+        if (!product) return null;
+        if (product.imageUrl && product.imageUrl.startsWith('http')) return product.imageUrl;
+        if (product.imageUrl) return `http://localhost:9090/images/${product.imageUrl}`;
+        if (product.image && product.image.startsWith('http')) return product.image;
+        if (product.image) return `http://localhost:9090/images/${product.image}`;
+        return null;
     };
 
     return (
@@ -464,7 +536,7 @@ const Gestionadmin = () => {
                     }}>
                         {editingProduct ? '✏️ Modifier le produit' : '➕ Ajouter un nouveau produit'}
                     </h2>
-                    
+
                     <div style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -482,8 +554,8 @@ const Gestionadmin = () => {
                             </label>
                             <input
                                 type="text"
-                                value={newProduct.name}
-                                onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                                value={newProduct.nom}
+                                onChange={(e) => setNewProduct({ ...newProduct, nom: e.target.value })}
                                 style={{
                                     width: '100%',
                                     padding: '0.8rem',
@@ -498,34 +570,7 @@ const Gestionadmin = () => {
                             />
                         </div>
 
-                        <div>
-                            <label style={{
-                                display: 'block',
-                                fontSize: '0.9rem',
-                                fontWeight: '600',
-                                color: '#2c3e2d',
-                                marginBottom: '0.5rem'
-                            }}>
-                                Catégorie *
-                            </label>
-                            <select
-                                value={newProduct.category}
-                                onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
-                                style={{
-                                    width: '100%',
-                                    padding: '0.8rem',
-                                    border: '2px solid #e8f5e8',
-                                    borderRadius: '10px',
-                                    fontSize: '1rem',
-                                    backgroundColor: 'white'
-                                }}
-                            >
-                                <option value="">Choisir une catégorie</option>
-                                {categories.map(cat => (
-                                    <option key={cat} value={cat}>{cat}</option>
-                                ))}
-                            </select>
-                        </div>
+                        
 
                         <div>
                             <label style={{
@@ -539,8 +584,8 @@ const Gestionadmin = () => {
                             </label>
                             <input
                                 type="number"
-                                value={newProduct.price}
-                                onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                                value={newProduct.prix}
+                                onChange={(e) => setNewProduct({ ...newProduct, prix: e.target.value })}
                                 style={{
                                     width: '100%',
                                     padding: '0.8rem',
@@ -567,7 +612,7 @@ const Gestionadmin = () => {
                             <input
                                 type="number"
                                 value={newProduct.stock}
-                                onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
+                                onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
                                 style={{
                                     width: '100%',
                                     padding: '0.8rem',
@@ -593,7 +638,7 @@ const Gestionadmin = () => {
                             <input
                                 type="text"
                                 value={newProduct.dimensions}
-                                onChange={(e) => setNewProduct({...newProduct, dimensions: e.target.value})}
+                                onChange={(e) => setNewProduct({ ...newProduct, dimensions: e.target.value })}
                                 style={{
                                     width: '100%',
                                     padding: '0.8rem',
@@ -613,21 +658,28 @@ const Gestionadmin = () => {
                                 color: '#2c3e2d',
                                 marginBottom: '0.5rem'
                             }}>
-                                Poids
+                                Type de produit *
                             </label>
-                            <input
-                                type="text"
-                                value={newProduct.weight}
-                                onChange={(e) => setNewProduct({...newProduct, weight: e.target.value})}
+                            <select
+                                value={newProduct.idTypeOeuvre === undefined || newProduct.idTypeOeuvre === null ? '' : String(newProduct.idTypeOeuvre)}
+                                onChange={e => setNewProduct({ ...newProduct, idTypeOeuvre: e.target.value })}
                                 style={{
                                     width: '100%',
                                     padding: '0.8rem',
                                     border: '2px solid #e8f5e8',
                                     borderRadius: '10px',
-                                    fontSize: '1rem'
+                                    fontSize: '1rem',
+                                    backgroundColor: 'white'
                                 }}
-                                placeholder="Ex: 15g"
-                            />
+                                required
+                            >
+                                <option value="">Sélectionner un type</option>
+                                {categories && categories.length > 0 && categories.map((type, idx) => (
+                                    <option key={type.id_type_oeuvre ?? idx} value={String(type.id_type_oeuvre)}>
+                                        {type.libelle}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
 
@@ -639,7 +691,7 @@ const Gestionadmin = () => {
                             color: '#2c3e2d',
                             marginBottom: '0.5rem'
                         }}>
-                            📸 Image du produit (URL)
+                            📸 Image du produit (URL ou fichier)
                         </label>
                         <div style={{
                             display: 'flex',
@@ -650,22 +702,36 @@ const Gestionadmin = () => {
                                 <input
                                     type="url"
                                     value={newProduct.imageUrl}
-                                    onChange={(e) => setNewProduct({...newProduct, imageUrl: e.target.value})}
+                                    onChange={(e) => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
                                     style={{
                                         width: '100%',
                                         padding: '0.8rem',
                                         border: '2px solid #e8f5e8',
-                                        borderRadius: '10px',
                                         fontSize: '1rem'
                                     }}
                                     placeholder="https://exemple.com/mon-image.jpg"
+                                />
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={e => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            setNewProduct({ ...newProduct, file });
+                                            // Pour l'aperçu immédiat
+                                            setNewProduct(prev => ({
+                                                ...prev,
+                                                imageUrl: URL.createObjectURL(file)
+                                            }));
+                                        }
+                                    }}
+                                    style={{ marginTop: '0.5rem' }}
                                 />
                                 <p style={{
                                     fontSize: '0.75rem',
                                     color: '#7a8a77',
                                     marginTop: '0.3rem'
                                 }}>
-                                    💡 Vous pouvez utiliser des images d'Unsplash, Pexels ou télécharger sur votre serveur
                                 </p>
                             </div>
                             {newProduct.imageUrl && (
@@ -680,8 +746,8 @@ const Gestionadmin = () => {
                                     alignItems: 'center',
                                     justifyContent: 'center'
                                 }}>
-                                    <img 
-                                        src={newProduct.imageUrl} 
+                                    <img
+                                        src={newProduct.imageUrl}
                                         alt="Aperçu"
                                         style={{
                                             width: '100%',
@@ -710,7 +776,7 @@ const Gestionadmin = () => {
                         </label>
                         <textarea
                             value={newProduct.description}
-                            onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                            onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
                             style={{
                                 width: '100%',
                                 padding: '0.8rem',
@@ -721,31 +787,6 @@ const Gestionadmin = () => {
                                 resize: 'vertical'
                             }}
                             placeholder="Décrivez votre produit..."
-                        />
-                    </div>
-
-                    <div style={{ marginTop: '1.5rem' }}>
-                        <label style={{
-                            display: 'block',
-                            fontSize: '0.9rem',
-                            fontWeight: '600',
-                            color: '#2c3e2d',
-                            marginBottom: '0.5rem'
-                        }}>
-                            Matériaux (séparés par des virgules)
-                        </label>
-                        <input
-                            type="text"
-                            value={newProduct.materials}
-                            onChange={(e) => setNewProduct({...newProduct, materials: e.target.value})}
-                            style={{
-                                width: '100%',
-                                padding: '0.8rem',
-                                border: '2px solid #e8f5e8',
-                                borderRadius: '10px',
-                                fontSize: '1rem'
-                            }}
-                            placeholder="Ex: Argile, Peinture acrylique, Vernis"
                         />
                     </div>
 
@@ -833,6 +874,16 @@ const Gestionadmin = () => {
                                     color: '#2c3e2d',
                                     textTransform: 'uppercase'
                                 }}>
+                                    Image
+                                </th>
+                                <th style={{
+                                    padding: '1.5rem',
+                                    textAlign: 'left',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '700',
+                                    color: '#2c3e2d',
+                                    textTransform: 'uppercase'
+                                }}>
                                     Produit
                                 </th>
                                 <th style={{
@@ -889,117 +940,33 @@ const Gestionadmin = () => {
                         </thead>
                         <tbody>
                             {products.map((product, index) => (
-                                <tr key={product.id} style={{
-                                    borderBottom: '1px solid #f0f8f0',
-                                    transition: 'all 0.3s ease',
-                                    cursor: 'pointer'
-                                }}
-                                onMouseOver={(e) => {
-                                    e.currentTarget.style.background = '#f8fdf8';
-                                }}
-                                onMouseOut={(e) => {
-                                    e.currentTarget.style.background = 'white';
-                                }}>
-                                    <td style={{
-                                        padding: '1.5rem'
-                                    }}>
-                                        <div style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '1rem'
-                                        }}>
-                                            <div style={{
-                                                width: '60px',
-                                                height: '60px',
-                                                borderRadius: '12px',
-                                                overflow: 'hidden',
-                                                border: '2px solid #e8f5e8',
-                                                background: '#f8f9fa',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center'
-                                            }}>
-                                                {product.imageUrl ? (
-                                                    <img 
-                                                        src={product.imageUrl} 
-                                                        alt={product.name}
-                                                        style={{
-                                                            width: '100%',
-                                                            height: '100%',
-                                                            objectFit: 'cover'
-                                                        }}
-                                                        onError={(e) => {
-                                                            e.target.style.display = 'none';
-                                                            e.target.parentNode.innerHTML = '<div style="font-size: 1.5rem;">' + product.image + '</div>';
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <div style={{
-                                                        fontSize: '1.5rem'
-                                                    }}>
-                                                        {product.image}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div>
-                                                <div style={{
-                                                    fontSize: '1rem',
-                                                    fontWeight: '600',
-                                                    color: '#2c3e2d',
-                                                    marginBottom: '0.2rem'
-                                                }}>
-                                                    {product.name}
-                                                </div>
-                                                <div style={{
-                                                    fontSize: '0.8rem',
-                                                    color: '#7a8a77'
-                                                }}>
-                                                    ID: {product.id}
-                                                </div>
-                                            </div>
+                                <tr key={product.id}>
+                                    <td>
+                                        {console.log("product.imageUrl:", product.imageUrl, "product:", product)}
+                                        <img
+                                            src={getImageUrl(product)}
+                                            alt={product.nom}
+                                            onError={e => { e.target.style.display = 'none'; }}
+                                            style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #e8f5e8' }}
+                                        />
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <div>{product.nom}</div>
+                                            <div>ID: {product.id}</div>
                                         </div>
                                     </td>
+                                    <td>{product.categorie}</td>
+                                    <td>{product.prix}€</td>
                                     <td style={{
-                                        padding: '1.5rem',
-                                        fontSize: '0.9rem',
-                                        color: '#5a6c57'
-                                    }}>
-                                        {product.category}
-                                    </td>
-                                    <td style={{
-                                        padding: '1.5rem',
-                                        fontSize: '1.1rem',
-                                        fontWeight: '700',
-                                        color: '#2c3e2d'
-                                    }}>
-                                        {product.price}€
-                                    </td>
-                                    <td style={{
-                                        padding: '1.5rem',
-                                        fontSize: '1rem',
-                                        fontWeight: '600',
                                         color: product.stock <= 5 ? '#ed8936' : '#48bb78'
                                     }}>
                                         {product.stock}
                                     </td>
-                                    <td style={{
-                                        padding: '1.5rem'
-                                    }}>
+                                    <td>
                                         <span style={{
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            gap: '0.5rem',
-                                            padding: '0.5rem 1rem',
-                                            borderRadius: '20px',
-                                            fontSize: '0.8rem',
-                                            fontWeight: '600',
-                                            color: 'white',
                                             background: getStatusColor(product.status)
                                         }}>
-                                            {product.status === 'Disponible' && '✅'}
-                                            {product.status === 'Stock faible' && '⚠️'}
-                                            {product.status === 'Rupture de stock' && '❌'}
-                                            {product.status === 'Sur commande' && '📋'}
                                             {product.status}
                                         </span>
                                     </td>
@@ -1048,7 +1015,7 @@ const Gestionadmin = () => {
                                                 }}
                                                 onMouseOver={(e) => {
                                                     e.target.style.background = '#48bb78';
-                                                    e.target.style.color = 'white';
+                                                    e.target.style.color = 'white'; // <-- Correction ici
                                                 }}
                                                 onMouseOut={(e) => {
                                                     e.target.style.background = 'none';
@@ -1104,7 +1071,7 @@ const Gestionadmin = () => {
                             color: '#2c3e2d',
                             marginBottom: '1.5rem'
                         }}>
-                            📋 Détails de {products[showProductDetails].name}
+                            📋 Détails de {products[showProductDetails].nom}
                         </h3>
                         <div style={{
                             display: 'grid',
@@ -1112,149 +1079,68 @@ const Gestionadmin = () => {
                             gap: '1.5rem'
                         }}>
                             <div>
-                                <p style={{
-                                    fontSize: '0.8rem',
-                                    color: '#7a8a77',
-                                    fontWeight: '600',
-                                    textTransform: 'uppercase',
-                                    marginBottom: '0.5rem'
-                                }}>
-                                    Image du produit
-                                </p>
-                                {products[showProductDetails].imageUrl ? (
-                                    <div style={{
-                                        width: '150px',
-                                        height: '150px',
-                                        borderRadius: '12px',
-                                        overflow: 'hidden',
-                                        border: '3px solid #e8f5e8',
-                                        background: '#f8f9fa'
-                                    }}>
-                                        <img 
-                                            src={products[showProductDetails].imageUrl} 
-                                            alt={products[showProductDetails].name}
-                                            style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                objectFit: 'cover'
-                                            }}
-                                        />
-                                    </div>
-                                ) : (
-                                    <div style={{
-                                        width: '150px',
-                                        height: '150px',
-                                        borderRadius: '12px',
-                                        border: '3px solid #e8f5e8',
-                                        background: '#f8f9fa',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '3rem'
-                                    }}>
-                                        {products[showProductDetails].image}
-                                    </div>
-                                )}
-                            </div>
-                            <div>
-                                <p style={{
-                                    fontSize: '0.8rem',
-                                    color: '#7a8a77',
-                                    fontWeight: '600',
-                                    textTransform: 'uppercase',
-                                    marginBottom: '0.5rem'
-                                }}>
-                                    Description
-                                </p>
-                                <p style={{
-                                    fontSize: '0.9rem',
-                                    color: '#2c3e2d',
-                                    lineHeight: '1.5'
-                                }}>
-                                    {products[showProductDetails].description}
-                                </p>
-                            </div>
-                            <div>
-                                <p style={{
-                                    fontSize: '0.8rem',
-                                    color: '#7a8a77',
-                                    fontWeight: '600',
-                                    textTransform: 'uppercase',
-                                    marginBottom: '0.5rem'
-                                }}>
-                                    Matériaux
-                                </p>
-                                <div style={{
-                                    display: 'flex',
-                                    flexWrap: 'wrap',
-                                    gap: '0.5rem'
-                                }}>
-                                    {products[showProductDetails].materials.map((material, mIndex) => (
-                                        <span key={mIndex} style={{
-                                            background: 'rgba(168, 196, 160, 0.2)',
-                                            color: '#2c3e2d',
-                                            padding: '0.3rem 0.8rem',
-                                            borderRadius: '15px',
+                                <p style={{ gap: '1.5rem' }}>
+                                    <div>
+                                        <p style={{
                                             fontSize: '0.8rem',
-                                            fontWeight: '500'
+                                            color: '#7a8a77',
+                                            fontWeight: '600',
+                                            textTransform: 'uppercase',
+                                            marginBottom: '0.5rem'
                                         }}>
-                                            {material}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                            <div>
-                                <p style={{
-                                    fontSize: '0.8rem',
-                                    color: '#7a8a77',
-                                    fontWeight: '600',
-                                    textTransform: 'uppercase',
-                                    marginBottom: '0.5rem'
-                                }}>
-                                    Dimensions
-                                </p>
-                                <p style={{
-                                    fontSize: '0.9rem',
-                                    color: '#2c3e2d',
-                                    fontWeight: '500'
-                                }}>
-                                    📏 {products[showProductDetails].dimensions}
-                                </p>
-                            </div>
-                            <div>
-                                <p style={{
-                                    fontSize: '0.8rem',
-                                    color: '#7a8a77',
-                                    fontWeight: '600',
-                                    textTransform: 'uppercase',
-                                    marginBottom: '0.5rem'
-                                }}>
-                                    Poids
-                                </p>
-                                <p style={{
-                                    fontSize: '0.9rem',
-                                    color: '#2c3e2d',
-                                    fontWeight: '500'
-                                }}>
-                                    ⚖️ {products[showProductDetails].weight}
-                                </p>
-                            </div>
-                            <div>
-                                <p style={{
-                                    fontSize: '0.8rem',
-                                    color: '#7a8a77',
-                                    fontWeight: '600',
-                                    textTransform: 'uppercase',
-                                    marginBottom: '0.5rem'
-                                }}>
-                                    Date d'ajout
-                                </p>
-                                <p style={{
-                                    fontSize: '0.9rem',
-                                    color: '#2c3e2d',
-                                    fontWeight: '500'
-                                }}>
-                                    📅 {products[showProductDetails].dateAdded}
+                                            Image du produit
+                                        </p>
+                                        <div style={{
+                                            width: '150px',
+                                            height: '150px',
+                                            borderRadius: '12px',
+                                            overflow: 'hidden',
+                                            border: '3px solid #e8f5e8',
+                                            background: '#f8f9fa'
+                                        }}>
+                                            <img
+                                                src={getImageUrl(products[showProductDetails])}
+                                                alt={products[showProductDetails].nom}
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    objectFit: 'cover'
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p style={{
+                                            fontSize: '0.8rem',
+                                            color: '#7a8a77',
+                                            fontWeight: '600',
+                                            textTransform: 'uppercase',
+                                            marginBottom: '0.5rem'
+                                        }}>
+                                            Description
+                                        </p>
+                                        <p style={{
+                                            fontSize: '0.9rem',
+                                            color: '#2c3e2d',
+                                            lineHeight: '1.5'
+                                        }}>
+                                            {products[showProductDetails].description}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p style={{
+                                            fontSize: '0.8rem',
+                                            color: '#7a8a77',
+                                            fontWeight: '600',
+                                            textTransform: 'uppercase',
+                                            marginBottom: '0.5rem'
+                                        }}>
+                                            Dimensions
+                                        </p>
+                                        <p>
+                                            📏 {products[showProductDetails].dimensions}
+                                        </p>
+                                    </div>
                                 </p>
                             </div>
                         </div>
