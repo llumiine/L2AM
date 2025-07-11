@@ -56,8 +56,8 @@ jobs:
           
       - name: Build and Push Docker images
         run: |
-          docker-compose -f docker-compose.staging.yml build
-          docker-compose -f docker-compose.staging.yml push
+          docker compose -f docker-compose.staging.yml build
+          docker compose -f docker-compose.staging.yml push
           
       - name: Deploy to Staging Server
         if: github.event_name == 'push'
@@ -68,6 +68,6 @@ jobs:
           key: ${{ secrets.STAGING_SSH_KEY }}
           script: |
             cd /opt/l2am-staging
-            docker-compose -f docker-compose.staging.yml pull
-            docker-compose -f docker-compose.staging.yml up -d --force-recreate
+            docker compose -f docker-compose.staging.yml pull
+            docker compose -f docker-compose.staging.yml up -d --force-recreate
             docker system prune -f

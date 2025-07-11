@@ -43,8 +43,8 @@ jobs:
           
       - name: Build and Push Docker images
         run: |
-          docker-compose build
-          docker-compose push
+          docker compose build
+          docker compose push
           
       - name: Deploy to Production Server
         uses: appleboy/ssh-action@master
@@ -54,6 +54,6 @@ jobs:
           key: ${{ secrets.PROD_SSH_KEY }}
           script: |
             cd /opt/l2am
-            docker-compose pull
-            docker-compose up -d --force-recreate
+            docker compose pull
+            docker compose up -d --force-recreate
             docker system prune -f
