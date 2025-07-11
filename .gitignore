@@ -3,3 +3,7 @@ node_modules/
 .DS_Store
 build/
 dist/
+<<<<<<< HEAD
+=======
+backend/src/main/resources/application.properties
+>>>>>>> ffbd993 (Mise à jour du .gitignore)
