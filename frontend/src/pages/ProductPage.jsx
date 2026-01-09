@@ -178,7 +178,7 @@ const ProductPage = () => {
 
           {/* Section Détails */}
           <div style={{ flex: 1, paddingLeft: "1.5rem" }}>
-            {/* Badge type */}
+            {/* Badge type dynamique */}
             <div style={{ marginBottom: "1.5rem" }}>
               <span
                 style={{
@@ -188,9 +188,10 @@ const ProductPage = () => {
                   borderRadius: "25px",
                   fontSize: "0.85rem",
                   fontWeight: "600",
+                  textTransform: "capitalize",
                 }}
               >
-                ✨ {product.typeLibelle || "Création artisanale"}
+                ✨ {product.typeLibelle && product.typeLibelle.trim() !== "" ? product.typeLibelle : "Création artisanale"}
               </span>
             </div>
 
@@ -207,34 +208,7 @@ const ProductPage = () => {
             </h1>
 
             {/* Étoiles et avis */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "1rem",
-                marginBottom: "2rem",
-              }}
-            >
-              <div style={{ display: "flex", gap: "2px" }}>
-                {[...Array(5)].map((_, i) => (
-                  <span
-                    key={i}
-                    style={{ color: "#f6ad55", fontSize: "1.2rem" }}
-                  >
-                    ★
-                  </span>
-                ))}
-              </div>
-              <span
-                style={{
-                  color: "#5a6c57",
-                  fontSize: "0.95rem",
-                  fontWeight: "500",
-                }}
-              >
-                4.8 (127 avis)
-              </span>
-            </div>
+            {/* Étoiles et note supprimées */}
 
             {/* Prix */}
             <div style={{ marginBottom: "2.5rem" }}>
@@ -248,7 +222,7 @@ const ProductPage = () => {
               >
                 {product.prix}€
               </p>
-              <p style={{ color: "#7a8a77" }}>Livraison gratuite incluse</p>
+              
             </div>
 
             {/* Informations produit */}
@@ -262,12 +236,6 @@ const ProductPage = () => {
                 color: "#5a6c57",
               }}
             >
-              <p>
-                <strong>Couleur:</strong> {product.couleur || "Non spécifiée"}
-              </p>
-              <p>
-                <strong>Taille:</strong> {product.taille || "Unique"}
-              </p>
               <p>
                 <strong>Stock:</strong> {product.stock || 0} disponible(s)
               </p>
@@ -466,21 +434,7 @@ const ProductPage = () => {
                   (e.target.style.transform = "translateY(0)")
                 }
               >
-                <div
-                  style={{ display: "flex", gap: "1px", marginBottom: "1rem" }}
-                >
-                  {[...Array(5)].map((_, i) => (
-                    <span
-                      key={i}
-                      style={{
-                        color: i < review.stars ? "#f6ad55" : "#e8f5e8",
-                        fontSize: "1rem",
-                      }}
-                    >
-                      ★
-                    </span>
-                  ))}
-                </div>
+                {/* Étoiles supprimées */}
                 <p
                   style={{
                     color: "#5a6c57",

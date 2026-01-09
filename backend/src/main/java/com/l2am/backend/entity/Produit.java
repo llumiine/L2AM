@@ -14,7 +14,7 @@ public class Produit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_produit")
     private Long id;
-
+ 
     @Column(name = "nom", length = 100, nullable = false)
     private String nom;
 
@@ -30,14 +30,10 @@ public class Produit {
     @Column(name = "couleur", length = 50)
     private String couleur;
 
-    @Column(name = "taille", length = 100)
-    private String taille;
 
     @Column(name = "image", length = 100)
     private String image;
 
-    @Column(name = "categorie", length = 100)
-    private String categorie;
 
     @Column(name = "dimensions", length = 100)
     private String dimensions;
@@ -105,13 +101,6 @@ public class Produit {
         this.couleur = couleur;
     }
 
-    public String getTaille() {
-        return taille;
-    }
-
-    public void setTaille(String taille) {
-        this.taille = taille;
-    }
 
     public String getImage() {
         return image;
@@ -121,13 +110,7 @@ public class Produit {
         this.image = image;
     }
 
-    public String getCategorie() {
-        return categorie;
-    }
 
-    public void setCategorie(String categorie) {
-        this.categorie = categorie;
-    }
 
     public String getDimensions() {
         return dimensions;

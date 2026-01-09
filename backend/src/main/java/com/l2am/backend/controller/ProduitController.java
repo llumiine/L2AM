@@ -12,7 +12,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-
+ 
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
@@ -22,15 +22,15 @@ public class ProduitController {
     private ProduitService produitService;
 
     @PostMapping(value = "/produits", consumes = {"multipart/form-data"})
-    public ResponseEntity<Produit> creerProduitAvecImage(
+        public ResponseEntity<Produit> creerProduitAvecImage(
             @RequestParam("nom") String nom,
             @RequestParam("prix") BigDecimal prix,
             @RequestParam("stock") Integer stock,
             @RequestParam("description") String description,
             @RequestParam(value = "dimensions", required = false) String dimensions,
-            @RequestParam(value = "typeLibelle", required = false) String typeLibelle,
+            @RequestParam(value = "idTypeOeuvre", required = false) Long idTypeOeuvre,
             @RequestParam(value = "file", required = false) MultipartFile file
-    ) {
+        ) {
         try {
             Produit produit = new Produit();
             produit.setNom(nom);
@@ -38,8 +38,8 @@ public class ProduitController {
             produit.setStock(stock);
             produit.setDescription(description);
             produit.setDimensions(dimensions);
-            if (typeLibelle != null && !typeLibelle.isEmpty()) {
-                TypeOeuvre typeOeuvre = produitService.findTypeOeuvreByLibelle(typeLibelle);
+            if (idTypeOeuvre != null) {
+                TypeOeuvre typeOeuvre = produitService.getTypeOeuvreById(idTypeOeuvre);
                 if (typeOeuvre != null) {
                     produit.setTypeOeuvre(typeOeuvre);
                 }
@@ -102,18 +102,53 @@ public class ProduitController {
         return ResponseEntity.ok(produitService.listerParPrix(min, max));
     }
 
-    @PutMapping(value = "/produits/{id}", consumes = "application/json")
-    public ResponseEntity<Produit> updateProduitJson(
+    @PutMapping(value = "/produits/{id}", consumes = {"multipart/form-data"})
+        public ResponseEntity<Produit> updateProduitAvecImage(
             @PathVariable Long id,
-            @RequestBody Produit produit
-    ) {
+            @RequestParam("nom") String nom,
+            @RequestParam("prix") BigDecimal prix,
+            @RequestParam("stock") Integer stock,
+            @RequestParam("description") String description,
+            @RequestParam(value = "dimensions", required = false) String dimensions,
+            @RequestParam(value = "idTypeOeuvre", required = false) Long idTypeOeuvre,
+            @RequestParam(value = "file", required = false) MultipartFile file
+        ) {
         try {
-            produit.setId(id);
-            // ...existing code...
+            Optional<Produit> optProduit = produitService.trouverParId(id);
+            if (optProduit.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            Produit produit = optProduit.get();
+            produit.setNom(nom);
+            produit.setPrix(prix);
+            produit.setStock(stock);
+            produit.setDescription(description);
+            produit.setDimensions(dimensions);
+
+            if (idTypeOeuvre != null) {
+                TypeOeuvre typeOeuvre = produitService.getTypeOeuvreById(idTypeOeuvre);
+                if (typeOeuvre != null) {
+                    produit.setTypeOeuvre(typeOeuvre);
+                }
+            }
+            if (file != null && !file.isEmpty()) {
+                String dossierImages = System.getProperty("user.dir") + "/images/";
+                File dossier = new File(dossierImages);
+                if (!dossier.exists()) {
+                    dossier.mkdirs();
+                }
+                String originalFilename = file.getOriginalFilename();
+                String newFilename = System.currentTimeMillis() + "_" + originalFilename;
+                String cheminComplet = dossierImages + newFilename;
+                file.transferTo(new File(cheminComplet));
+                produit.setImage(newFilename);
+            }
+
             Produit updated = produitService.mettreAJour(produit);
             return ResponseEntity.ok(updated);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
         }
     }
 

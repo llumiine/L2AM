@@ -61,14 +61,14 @@ const Gestionadmin = () => {
     const fetchCategories = async () => {
         try {
             const token = localStorage.getItem("token");
-            const response = await axios.get("http://localhost:9090/api/types", {
+            const response = await axios.get("http://localhost:9090/api/types-oeuvre", {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
-            console.log("Réponse API types :", response.data);
             setCategories(response.data);
         } catch (err) {
+            setCategories([]);
             console.error("Erreur lors du chargement des types d'oeuvre:", err);
         }
     };
@@ -91,14 +91,8 @@ const Gestionadmin = () => {
                 formData.append('dimensions', newProduct.dimensions);
                 formData.append('couleur', newProduct.couleur);
                 formData.append('taille', newProduct.taille);
-                // On force l'envoi du typeLibelle correct
-                const type = categories.find(t => String(t.id_type_oeuvre) === String(newProduct.idTypeOeuvre));
-                if (type) {
-                    formData.append('typeLibelle', type.libelle);
-                } else {
-                    alert('Type de produit invalide.');
-                    return;
-                }
+                // On envoie l'id du type d'oeuvre
+                formData.append('idTypeOeuvre', newProduct.idTypeOeuvre);
                 await axios.post('http://localhost:9090/api/produits', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
@@ -148,14 +142,8 @@ const Gestionadmin = () => {
             formData.append('couleur', newProduct.couleur);
             formData.append('taille', newProduct.taille);
             formData.append('poids', newProduct.poids);
-            // On force l'envoi du typeLibelle correct
-            const type = categories.find(t => String(t.id_type_oeuvre) === String(newProduct.idTypeOeuvre));
-            if (type) {
-                formData.append('typeLibelle', type.libelle);
-            } else {
-                alert('Type de produit invalide.');
-                return;
-            }
+            // On envoie l'id du type d'oeuvre
+            formData.append('idTypeOeuvre', newProduct.idTypeOeuvre);
             // Si un fichier est sélectionné, on l'ajoute
             if (newProduct.file) {
                 formData.append('file', newProduct.file);
@@ -675,7 +663,7 @@ const Gestionadmin = () => {
                             >
                                 <option value="">Sélectionner un type</option>
                                 {categories && categories.length > 0 && categories.map((type, idx) => (
-                                    <option key={type.id_type_oeuvre ?? idx} value={String(type.id_type_oeuvre)}>
+                                    <option key={type.idType ?? idx} value={String(type.idType)}>
                                         {type.libelle}
                                     </option>
                                 ))}
@@ -894,7 +882,7 @@ const Gestionadmin = () => {
                                     color: '#2c3e2d',
                                     textTransform: 'uppercase'
                                 }}>
-                                    Catégorie
+                                    Type
                                 </th>
                                 <th style={{
                                     padding: '1.5rem',
@@ -957,6 +945,7 @@ const Gestionadmin = () => {
                                         </div>
                                     </td>
                                     <td>{product.categorie}</td>
+                                                    <td>{product.typeOeuvre?.libelle || ''}</td>
                                     <td>{product.prix}€</td>
                                     <td style={{
                                         color: product.stock <= 5 ? '#ed8936' : '#48bb78'

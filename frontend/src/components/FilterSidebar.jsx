@@ -31,58 +31,43 @@ const FilterSidebar = ({ onFilterChange }) => {
 
   const loadFilterData = async () => {
     if (isLoadingData.current) return;
-    
     isLoadingData.current = true;
-    
     try {
       setLoading(true);
-      
-      
+
+      // Récupère les types depuis l'API
+      const typesResponse = await axios.get('http://localhost:9090/api/types');
+      setTypes(typesResponse.data);
+
+      // Récupère les produits pour les autres filtres
       const produitsResponse = await axios.get('http://localhost:9090/api/produits');
       const produits = produitsResponse.data;
-      
-      
-      const defaultTypes = [
-        { idTypeOeuvre: 1, libelle: "Digital", nom: null },
-        { idTypeOeuvre: 2, libelle: "Argile", nom: null },
-        { idTypeOeuvre: 3, libelle: "Calligraphie", nom: null }
-      ];
-      
-      
+
       const uniqueColors = [...new Set(
         produits.map(p => p.couleur).filter(c => c && c.trim())
       )];
-      
+
       const uniqueSizes = [...new Set(
         produits.map(p => p.taille).filter(t => t && t.trim())
       )];
-      
+
       const prices = produits.map(p => parseFloat(p.prix)).filter(p => !isNaN(p));
       const newPriceRange = prices.length > 0 ? 
         { min: Math.floor(Math.min(...prices)), max: Math.ceil(Math.max(...prices)) } :
         { min: 0, max: 200 };
-      
-      
-      setTypes(defaultTypes);
+
       setColors(uniqueColors);
       setSizes(uniqueSizes);
       setPriceRange(newPriceRange);
       setCurrentMaxPrice(newPriceRange.max);
       setError(null);
-      
+
     } catch (err) {
       console.error('Erreur chargement filtres:', err);
       setError('Erreur de chargement');
-      
-      
-      setTypes([
-        { idTypeOeuvre: 1, libelle: "Digital", nom: null },
-        { idTypeOeuvre: 2, libelle: "Argile", nom: null },
-        { idTypeOeuvre: 3, libelle: "Calligraphie", nom: null }
-      ]);
+      setTypes([]);
       setColors(["Rouge", "Beige", "Bleu", "Gris", "Vert"]);
       setSizes(["S", "M", "L", "A4"]);
-      
     } finally {
       setLoading(false);
       hasLoadedData.current = true;
@@ -176,6 +161,12 @@ const FilterSidebar = ({ onFilterChange }) => {
     }
   }, [priceRange.max, priceRange.min, onFilterChange]);
 
+  useEffect(() => {
+    axios.get('http://localhost:9090/api/types')
+      .then(res => setTypes(res.data))
+      .catch(() => setTypes([]));
+  }, []);
+
   if (loading) {
     return (
       <aside className="filter-sidebar">
@@ -203,13 +194,13 @@ const FilterSidebar = ({ onFilterChange }) => {
         </h3>
         <div className="filter-options">
           {types.map(type => {
-            const isChecked = selectedTypeIds.includes(type.idTypeOeuvre);
+            const isChecked = selectedTypeIds.includes(type.idType);
             return (
-              <label key={type.idTypeOeuvre} className="filter-checkbox">
+              <label key={type.idType} className="filter-checkbox">
                 <input
                   type="checkbox"
                   checked={isChecked}
-                  onChange={() => handleTypeToggle(type.idTypeOeuvre)}
+                  onChange={() => handleTypeToggle(type.idType)}
                 />
                 <span className="checkmark"></span>
                 <span className="filter-label">{type.libelle}</span>

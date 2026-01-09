@@ -7,11 +7,16 @@ const Panier = () => {
   const { cartItems, cartCount, updateQuantity, removeFromCart, clearCart } = useCart();
   const [promoCode, setPromoCode] = useState("");
 
+  console.log("cartItems", cartItems);
+  if (cartItems.length > 0) {
+    console.log("image du premier produit :", cartItems[0].image);
+  }
+
   const getImageUrl = (item) => {
     if (!item?.image) {
       return null;
     }
-    return `/images/${item.image}`;
+    return `http://localhost:9090/images/${item.image}`;
   };
 
   const getFallbackImage = (item) => {

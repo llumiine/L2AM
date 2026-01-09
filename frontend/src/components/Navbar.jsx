@@ -11,7 +11,7 @@ export default function Navbar() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { cartCount } = useCart();
+  const { cartCount, clearCart } = useCart();
 
   useEffect(() => {
     checkAuthStatus();
@@ -58,6 +58,7 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    clearCart(); // Vide le panier à la déconnexion
     setIsLoggedIn(false);
     setUser(null);
     setShowUserMenu(false);

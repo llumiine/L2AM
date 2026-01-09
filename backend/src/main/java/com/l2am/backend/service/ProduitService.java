@@ -88,8 +88,7 @@ public TypeOeuvre findTypeOeuvreByLibelle(String libelle) {
                             (p.getTypeOeuvre() != null && types.contains(p.getTypeOeuvre().getIdType())))
                     .filter(p -> maxPriceBigDecimal == null || 
                             (p.getPrix() != null && p.getPrix().compareTo(maxPriceBigDecimal) <= 0))
-                    .filter(p -> sizes == null || sizes.isEmpty() || 
-                            (p.getTaille() != null && sizes.contains(p.getTaille())))
+                        
                     .collect(Collectors.toList());
         } catch (Exception e) {
             System.err.println("Erreur dans getProduitsFiltres: " + e.getMessage());

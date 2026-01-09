@@ -36,7 +36,89 @@ const AdresseCommande = () => {
                     if (!res.ok) throw new Error("Erreur lors du chargement des commandes");
                     const allCommandes = await res.json();
                     const userCommandes = allCommandes.filter(cmd => cmd.idUtilisateur === currentUser.id);
-                    setCommandes(userCommandes);
+
+                    // Enrichir chaque commande avec facture et produits
+                    const commandesAvecDetails = await Promise.all(
+                        userCommandes.map(async (cmd) => {
+                            let factureData = {};
+                            if (cmd.idFacture) {
+                                try {
+                                    const factureRes = await fetch(`http://localhost:9090/api/factures/${cmd.idFacture}`,
+                                        {
+                                            headers: {
+                                                "Authorization": token ? `Bearer ${token}` : undefined,
+                                                "Content-Type": "application/json"
+                                            }
+                                        }
+                                    );
+                                    if (factureRes.ok) {
+                                        factureData = await factureRes.json();
+                                    }
+                                } catch (err) {
+                                    console.error("Erreur lors du chargement de la facture:", err);
+                                }
+                            }
+
+                            // Récupérer les produits associés à la commande (via lignes ou idProduit)
+                            let produitsInfos = [];
+                            if (Array.isArray(cmd.lignes) && cmd.lignes.length > 0) {
+                                produitsInfos = await Promise.all(cmd.lignes.map(async (ligne) => {
+                                    if (ligne.idProduit) {
+                                        try {
+                                            const produitRes = await fetch(`http://localhost:9090/api/produits/${ligne.idProduit}`, {
+                                                headers: {
+                                                    "Authorization": token ? `Bearer ${token}` : undefined,
+                                                    "Content-Type": "application/json"
+                                                }
+                                            });
+                                            if (produitRes.ok) {
+                                                const produitData = await produitRes.json();
+                                                return {
+                                                    nom: produitData.nom,
+                                                    image: produitData.image,
+                                                    id: produitData.id
+                                                };
+                                            }
+                                        } catch (err) {
+                                            console.error("Erreur lors du chargement du produit:", err);
+                                        }
+                                    }
+                                    return { nom: ligne.nomProduit || "Produit", image: null, id: ligne.idProduit };
+                                }));
+                            } else if (cmd.idProduit) {
+                                // Cas fallback : commande simple (pas de lignes)
+                                try {
+                                    const produitRes = await fetch(`http://localhost:9090/api/produits/${cmd.idProduit}`, {
+                                        headers: {
+                                            "Authorization": token ? `Bearer ${token}` : undefined,
+                                            "Content-Type": "application/json"
+                                        }
+                                    });
+                                    if (produitRes.ok) {
+                                        const produitData = await produitRes.json();
+                                        produitsInfos = [{ nom: produitData.nom, image: produitData.image || getFallbackImage(), id: produitData.id }];
+                                    } else {
+                                        produitsInfos = [{ nom: "Produit inconnu", image: getFallbackImage(), id: cmd.idProduit }];
+                                    }
+                                } catch (err) {
+                                    produitsInfos = [{ nom: "Produit inconnu", image: getFallbackImage(), id: cmd.idProduit }];
+                                    console.error("Erreur lors du chargement du produit (fallback):", err);
+                                }
+                            }
+
+                            return {
+                                ...cmd,
+                                total: factureData?.total,
+                                date: factureData?.datePaiement,
+                                adresse: factureData?.adresse,
+                                ville: factureData?.ville,
+                                codePostal: factureData?.codePostal,
+                                livraison: factureData?.livraison,
+                                produitsInfos
+                            };
+                        })
+                    );
+                    setCommandes(commandesAvecDetails);
                 } else {
                     setCommandes([]);
                 }
@@ -130,7 +212,7 @@ const AdresseCommande = () => {
             );
             localStorage.setItem("users", JSON.stringify(updatedUsers));
 
-            // Mettre à jour l'état local
+            // Mettre à jour
             setUserData(updatedUser);
             alert("Adresse mise à jour avec succès !");
             setShowAddressForm(false);
@@ -140,20 +222,6 @@ const AdresseCommande = () => {
         }
     };
 
-    const voirCommande = (commandeId) => {
-        const commande = commandes.find((cmd) => cmd.idCommande === commandeId);
-        if (commande) {
-            const details = `
-Détails de la commande ${commandeId}:
-- Utilisateur: ${commande.idUtilisateur}
-- Produit: ${commande.idProduit}
-- Quantité: ${commande.quantite}
-- Prix unitaire: ${commande.prixAchat}€
-- Facture: ${commande.idFacture || 'N/A'}
-            `;
-            alert(details);
-        }
-    };
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -164,47 +232,16 @@ Détails de la commande ${commandeId}:
         });
     };
 
-    const getStatusColor = (status) => {
-        if (!status || typeof status !== 'string') {
-            return "linear-gradient(135deg, #a0aec0, #718096)";
-        }
-        switch (status.toLowerCase()) {
-            case "livrée":
-            case "livree":
-                return "linear-gradient(135deg, #48bb78, #38a169)";
-            case "en cours":
-                return "linear-gradient(135deg, #ed8936, #dd6b20)";
-            case "expédiée":
-            case "expediee":
-                return "linear-gradient(135deg, #4299e1, #3182ce)";
-            case "annulée":
-            case "annulee":
-                return "linear-gradient(135deg, #f56565, #e53e3e)";
-            default:
-                return "linear-gradient(135deg, #a0aec0, #718096)";
-        }
-    };
 
-    const getStatusIcon = (status) => {
-        if (!status || typeof status !== 'string') {
-            return "⏳";
-        }
-        switch (status.toLowerCase()) {
-            case "livrée":
-            case "livree":
-                return "✅";
-            case "en cours":
-                return "🚚";
-            case "expédiée":
-            case "expediee":
-                return "📦";
-            case "annulée":
-            case "annulee":
-                return "❌";
-            default:
-                return "⏳";
-        }
-    };
+    // Utilitaire pour image fallback
+const getFallbackImage = () =>
+  "https://via.placeholder.com/32x32.png?text=Produit";
+
+const getImageUrl = (image) => {
+    if (!image) return getFallbackImage();
+    if (image.startsWith("http")) return image;
+    return `http://localhost:9090/images/${image}`;
+};
 
     if (loading) {
         return (
@@ -684,7 +721,7 @@ Détails de la commande ${commandeId}:
                                                                     📅 Date
                                                                 </span>
                                                                 <p style={{ fontSize: "1rem", color: "#2c3e2d", fontWeight: "600", marginTop: "0.3rem" }}>
-                                                                    {formatDate(recent.date)}
+                                                                    {recent.date ? formatDate(recent.date) : "-"}
                                                                 </p>
                                                             </div>
                                                             <div>
@@ -692,7 +729,7 @@ Détails de la commande ${commandeId}:
                                                                     💰 Total
                                                                 </span>
                                                                 <p style={{ fontSize: "1.2rem", color: "#2c3e2d", fontWeight: "700", marginTop: "0.3rem" }}>
-                                                                    {recent.total}€
+                                                                    {recent.total !== undefined ? `${recent.total}€` : "-"}
                                                                 </p>
                                                             </div>
                                                             <div>
@@ -701,6 +738,12 @@ Détails de la commande ${commandeId}:
                                                                 </span>
                                                                 <p style={{ fontSize: "1rem", color: "#5a6c57", marginTop: "0.3rem" }}>
                                                                     {recent.adresse || "Adresse non renseignée"}
+                                                                    {recent.codePostal || recent.ville ? (
+                                                                        <><br/>{recent.codePostal} {recent.ville}</>
+                                                                    ) : null}
+                                                                    {recent.livraison !== undefined ? (
+                                                                        <><br/>Frais livraison : {recent.livraison}€</>
+                                                                    ) : null}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -709,12 +752,22 @@ Détails de la commande ${commandeId}:
                                                                 🛍️ Produits
                                                             </span>
                                                             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.5rem" }}>
-                                                                {Array.isArray(recent.produits) && recent.produits.length > 0 ? (
-                                                                    recent.produits.map((produit, pIndex) => (
-                                                                        <span key={pIndex} style={{ background: "rgba(168, 196, 160, 0.2)", color: "#2c3e2d", padding: "0.3rem 0.8rem", borderRadius: "15px", fontSize: "0.85rem", fontWeight: "500" }}>
-                                                                            {typeof produit === 'string' ? produit : produit.nom || JSON.stringify(produit)}
-                                                                        </span>
-                                                                    ))
+                                                                {Array.isArray(recent.produitsInfos) && recent.produitsInfos.length > 0 ? (
+                                                                    recent.produitsInfos.map((produit, pIndex) => {
+                                                                        // Chercher la quantité dans recent.lignes si possible
+                                                                        let quantite = '';
+                                                                        if (Array.isArray(recent.lignes)) {
+                                                                            const ligne = recent.lignes.find(l => l.idProduit === produit.id);
+                                                                            if (ligne) quantite = ` x${ligne.quantite}`;
+                                                                        }
+                                                                        return (
+                                                                            <span key={pIndex} style={{ display: "flex", alignItems: "center", background: "rgba(168, 196, 160, 0.2)", color: "#2c3e2d", padding: "0.3rem 0.8rem", borderRadius: "15px", fontSize: "0.85rem", fontWeight: "500", gap: "0.5rem" }}>
+                                                                                {(() => { const url = getImageUrl(produit.image); console.log('Image URL commande:', url, produit); return null; })()}
+                                                                                <img src={getImageUrl(produit.image)} alt={produit.nom} style={{ width: 32, height: 32, objectFit: "cover", borderRadius: "8px" }} />
+                                                                                {produit.nom}{quantite}
+                                                                            </span>
+                                                                        );
+                                                                    })
                                                                 ) : (
                                                                     <span style={{ color: '#b0b0b0' }}>Aucun produit</span>
                                                                 )}
@@ -734,24 +787,10 @@ Détails de la commande ${commandeId}:
                                                         )}
                                                     </div>
                                                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "1rem" }}>
-                                                        <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.6rem 1.2rem", borderRadius: "20px", fontSize: "0.9rem", fontWeight: "600", color: "white", background: getStatusColor(recent.status) }}>
-                                                            {getStatusIcon(recent.status)}
-                                                            {recent.status}
+                                                        <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.6rem 1.2rem", borderRadius: "20px", fontSize: "0.9rem", fontWeight: "600", color: "white" }}>
+                                                            
                                                         </span>
-                                                        <button
-                                                            onClick={() => voirCommande(recent.id)}
-                                                            style={{ background: "linear-gradient(135deg, #a8c4a0, #8fb085)", color: "white", border: "none", padding: "0.8rem 1.5rem", borderRadius: "10px", cursor: "pointer", fontSize: "0.9rem", fontWeight: "600", boxShadow: "0 4px 12px rgba(168, 196, 160, 0.3)", transition: "all 0.3s ease", minWidth: "100px" }}
-                                                            onMouseOver={(e) => {
-                                                                e.target.style.transform = "translateY(-2px)";
-                                                                e.target.style.boxShadow = "0 6px 18px rgba(168, 196, 160, 0.4)";
-                                                            }}
-                                                            onMouseOut={(e) => {
-                                                                e.target.style.transform = "translateY(0)";
-                                                                e.target.style.boxShadow = "0 4px 12px rgba(168, 196, 160, 0.3)";
-                                                            }}
-                                                        >
-                                                            👁️ Voir détails
-                                                        </button>
+
                                                     </div>
                                                 </div>
                                             </div>
@@ -823,7 +862,7 @@ Détails de la commande ${commandeId}:
                                                                         📅 Date
                                                                     </span>
                                                                     <p style={{ fontSize: "1rem", color: "#2c3e2d", fontWeight: "600", marginTop: "0.3rem" }}>
-                                                                        {formatDate(commande.date)}
+                                                                        {commande.date ? formatDate(commande.date) : "-"}
                                                                     </p>
                                                                 </div>
                                                                 <div>
@@ -831,7 +870,7 @@ Détails de la commande ${commandeId}:
                                                                         💰 Total
                                                                     </span>
                                                                     <p style={{ fontSize: "1.2rem", color: "#2c3e2d", fontWeight: "700", marginTop: "0.3rem" }}>
-                                                                        {commande.total}€
+                                                                        {commande.total !== undefined ? `${commande.total}€` : "-"}
                                                                     </p>
                                                                 </div>
                                                                 <div>
@@ -840,6 +879,12 @@ Détails de la commande ${commandeId}:
                                                                     </span>
                                                                     <p style={{ fontSize: "1rem", color: "#5a6c57", marginTop: "0.3rem" }}>
                                                                         {commande.adresse || "Adresse non renseignée"}
+                                                                        {commande.codePostal || commande.ville ? (
+                                                                            <><br/>{commande.codePostal} {commande.ville}</>
+                                                                        ) : null}
+                                                                        {commande.livraison !== undefined ? (
+                                                                            <><br/>Frais livraison : {commande.livraison}€</>
+                                                                        ) : null}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -848,12 +893,24 @@ Détails de la commande ${commandeId}:
                                                                     🛍️ Produits
                                                                 </span>
                                                                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.5rem" }}>
-                                                                    {Array.isArray(commande.produits) && commande.produits.length > 0 ? (
-                                                                        commande.produits.map((produit, pIndex) => (
-                                                                            <span key={pIndex} style={{ background: "rgba(168, 196, 160, 0.2)", color: "#2c3e2d", padding: "0.3rem 0.8rem", borderRadius: "15px", fontSize: "0.85rem", fontWeight: "500" }}>
-                                                                                {typeof produit === 'string' ? produit : produit.nom || JSON.stringify(produit)}
-                                                                            </span>
-                                                                        ))
+                                                                    {Array.isArray(commande.produitsInfos) && commande.produitsInfos.length > 0 ? (
+                                                                        commande.produitsInfos.map((produit, pIndex) => {
+                                                                            let quantite = '';
+                                                                            if (Array.isArray(commande.lignes)) {
+                                                                                const ligne = commande.lignes.find(l => l.idProduit === produit.id);
+                                                                                if (ligne) quantite = ` x${ligne.quantite}`;
+                                                                            }
+                                                                            return (
+                                                                                <span key={pIndex} style={{ display: "flex", alignItems: "center", background: "rgba(168, 196, 160, 0.2)", color: "#2c3e2d", padding: "0.3rem 0.8rem", borderRadius: "15px", fontSize: "0.85rem", fontWeight: "500", gap: "0.5rem" }}>
+                                                                                    {(() => { const url = getImageUrl(produit.image); console.log('Image URL commande:', url, produit); return null; })()}
+                                                                                    <img
+                                                                                        src={getImageUrl(produit.image)}
+                                                                                        alt={produit.nom}
+                                                                                        style={{ width: 32, height: 32, objectFit: "cover", borderRadius: "8px" }} />
+                                                                                    {produit.nom}{quantite}
+                                                                                </span>
+                                                                            );
+                                                                        })
                                                                     ) : (
                                                                         <span style={{ color: '#b0b0b0' }}>Aucun produit</span>
                                                                     )}
@@ -873,24 +930,10 @@ Détails de la commande ${commandeId}:
                                                             )}
                                                         </div>
                                                         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "1rem" }}>
-                                                            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.6rem 1.2rem", borderRadius: "20px", fontSize: "0.9rem", fontWeight: "600", color: "white", background: getStatusColor(commande.status) }}>
-                                                                {getStatusIcon(commande.status)}
-                                                                {commande.status}
+                                                            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.6rem 1.2rem", borderRadius: "20px", fontSize: "0.9rem", fontWeight: "600", color: "white" }}>
+                                                                
                                                             </span>
-                                                            <button
-                                                                onClick={() => voirCommande(commande.id)}
-                                                                style={{ background: "linear-gradient(135deg, #a8c4a0, #8fb085)", color: "white", border: "none", padding: "0.8rem 1.5rem", borderRadius: "10px", cursor: "pointer", fontSize: "0.9rem", fontWeight: "600", boxShadow: "0 4px 12px rgba(168, 196, 160, 0.3)", transition: "all 0.3s ease", minWidth: "100px" }}
-                                                                onMouseOver={(e) => {
-                                                                    e.target.style.transform = "translateY(-2px)";
-                                                                    e.target.style.boxShadow = "0 6px 18px rgba(168, 196, 160, 0.4)";
-                                                                }}
-                                                                onMouseOut={(e) => {
-                                                                    e.target.style.transform = "translateY(0)";
-                                                                    e.target.style.boxShadow = "0 4px 12px rgba(168, 196, 160, 0.3)";
-                                                                }}
-                                                            >
-                                                                👁️ Voir détails
-                                                            </button>
+                                                            {/* Bouton 'Voir détails' supprimé */}
                                                         </div>
                                                     </div>
                                                 </div>
