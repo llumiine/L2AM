@@ -1,9 +1,12 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/Propos.css";
-
-const portrait = "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face";
+import portrait from "../assets/about.jpg";
 
 const Propos = () => {
+  const navigate = useNavigate();
+  const goToShop = () => navigate("/shop");
+  const goToContact = () => navigate("/contact");
   return (
       <div className="propos-page">
         <div className="propos-container">
@@ -50,27 +53,14 @@ const Propos = () => {
                 </div>
               </div>
 
-              <div className="stats-section">
-                <div className="stat-item">
-                  <span className="stat-number">100+</span>
-                  <span className="stat-label">Créations réalisées</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-number">50+</span>
-                  <span className="stat-label">Clients satisfaits</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-number">3+</span>
-                  <span className="stat-label">Années d'expérience</span>
-                </div>
-              </div>
+              
 
               <div className="cta-section">
-                <button className="cta-button primary">
+                <button className="cta-button primary" onClick={goToShop}>
                   <span>Découvrir mes créations</span>
                   <span className="button-arrow">→</span>
                 </button>
-                <button className="cta-button secondary">
+                <button className="cta-button secondary" onClick={goToContact}>
                   <span>Me contacter</span>
                   <span className="button-icon">💌</span>
                 </button>

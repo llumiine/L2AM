@@ -81,13 +81,10 @@ const FilterSidebar = ({ onFilterChange }) => {
       const newIds = prev.includes(typeId)
         ? prev.filter(id => id !== typeId)
         : [...prev, typeId];
-      
-      
       setTimeout(() => {
-        const selectedTypeObjects = types.filter(t => newIds.includes(t.idTypeOeuvre));
         if (onFilterChange) {
           onFilterChange({
-            types: selectedTypeObjects,
+            types: newIds,
             colors: selectedColors,
             sizes: selectedSizes,
             maxPrice: currentMaxPrice,
@@ -95,23 +92,19 @@ const FilterSidebar = ({ onFilterChange }) => {
           });
         }
       }, 0);
-      
       return newIds;
     });
-  }, [types, selectedColors, selectedSizes, currentMaxPrice, priceRange.min, onFilterChange]);
+  }, [selectedColors, selectedSizes, currentMaxPrice, priceRange.min, onFilterChange]);
 
   const handleItemToggle = useCallback((item, currentList, setter, filterType) => {
     setter(prev => {
       const newList = prev.includes(item)
         ? prev.filter(i => i !== item)
         : [...prev, item];
-      
-      
       setTimeout(() => {
         if (onFilterChange) {
-          const selectedTypeObjects = types.filter(t => selectedTypeIds.includes(t.idTypeOeuvre));
           onFilterChange({
-            types: selectedTypeObjects,
+            types: selectedTypeIds,
             colors: filterType === 'colors' ? newList : selectedColors,
             sizes: filterType === 'sizes' ? newList : selectedSizes,
             maxPrice: currentMaxPrice,
@@ -119,29 +112,25 @@ const FilterSidebar = ({ onFilterChange }) => {
           });
         }
       }, 0);
-      
       return newList;
     });
-  }, [types, selectedTypeIds, selectedColors, selectedSizes, currentMaxPrice, priceRange.min, onFilterChange]);
+  }, [selectedTypeIds, selectedColors, selectedSizes, currentMaxPrice, priceRange.min, onFilterChange]);
 
   const handlePriceChange = useCallback((newPrice) => {
     const price = parseInt(newPrice);
     setCurrentMaxPrice(price);
-    
-    
     setTimeout(() => {
       if (onFilterChange) {
-        const selectedTypeObjects = types.filter(t => selectedTypeIds.includes(t.idTypeOeuvre));
         onFilterChange({
-          types: selectedTypeObjects,
+          types: selectedTypeIds,
           colors: selectedColors,
           sizes: selectedSizes,
           maxPrice: price,
           minPrice: priceRange.min
         });
       }
-    }, 100); // Délai plus long pour le prix (éviter trop d'appels)
-  }, [types, selectedTypeIds, selectedColors, selectedSizes, priceRange.min, onFilterChange]);
+    }, 100);
+  }, [selectedTypeIds, selectedColors, selectedSizes, priceRange.min, onFilterChange]);
 
   
   const resetFilters = useCallback(() => {
@@ -149,7 +138,6 @@ const FilterSidebar = ({ onFilterChange }) => {
     setSelectedColors([]);
     setSelectedSizes([]);
     setCurrentMaxPrice(priceRange.max);
-    
     if (onFilterChange) {
       onFilterChange({
         types: [],
@@ -293,36 +281,7 @@ const FilterSidebar = ({ onFilterChange }) => {
       </div>
 
       
-      {(selectedTypeIds.length > 0 || selectedColors.length > 0 || selectedSizes.length > 0) && (
-        <div className="active-filters-summary">
-          <h4>Filtres actifs:</h4>
-          <div className="active-filters-list">
-            {selectedTypeIds.map(typeId => {
-              const type = types.find(t => t.idTypeOeuvre === typeId);
-              return type ? (
-                <span key={typeId} className="filter-tag">
-                  {type.libelle}
-                  <button onClick={() => handleTypeToggle(typeId)}>×</button>
-                </span>
-              ) : null;
-            })}
-            
-            {selectedColors.map(color => (
-              <span key={color} className="filter-tag">
-                {color}
-                <button onClick={() => handleItemToggle(color, selectedColors, setSelectedColors, 'colors')}>×</button>
-              </span>
-            ))}
-            
-            {selectedSizes.map(size => (
-              <span key={size} className="filter-tag">
-                {size}
-                <button onClick={() => handleItemToggle(size, selectedSizes, setSelectedSizes, 'sizes')}>×</button>
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Bloc 'Filtres actifs' supprimé */}
     </aside>
   );
 };

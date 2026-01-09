@@ -208,7 +208,34 @@ const ProductPage = () => {
             </h1>
 
             {/* Étoiles et avis */}
-            {/* Étoiles et note supprimées */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                marginBottom: "2rem",
+              }}
+            >
+              <div style={{ display: "flex", gap: "2px" }}>
+                {[...Array(5)].map((_, i) => (
+                  <span
+                    key={i}
+                    style={{ color: "#f6ad55", fontSize: "1.2rem" }}
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
+              <span
+                style={{
+                  color: "#5a6c57",
+                  fontSize: "0.95rem",
+                  fontWeight: "500",
+                }}
+              >
+                4.8 (127 avis)
+              </span>
+            </div>
 
             {/* Prix */}
             <div style={{ marginBottom: "2.5rem" }}>
@@ -222,7 +249,7 @@ const ProductPage = () => {
               >
                 {product.prix}€
               </p>
-              
+              <p style={{ color: "#7a8a77" }}>Livraison gratuite incluse</p>
             </div>
 
             {/* Informations produit */}

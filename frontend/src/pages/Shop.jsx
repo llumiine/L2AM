@@ -51,7 +51,7 @@ const Shop = () => {
     }
 
     if (currentFilters.types.length > 0) {
-      const typeIds = currentFilters.types.map(typeObj => typeObj.idTypeOeuvre);
+      const typeIds = currentFilters.types;
       filtered = filtered.filter((product) => 
         typeIds.includes(product.idTypeOeuvre)
       );

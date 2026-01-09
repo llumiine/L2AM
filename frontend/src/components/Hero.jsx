@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import "../styles/Hero.css";
 
 export default function Hero() {
   const [scrollY, setScrollY] = useState(0);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const navigate = useNavigate();
 
-  
   const carouselImages = [
     { id: 1, src: "/images/art1.jpg", alt: "Gâteau Fraise Digital" },
     { id: 2, src: "/images/art2.jpg", alt: "Porte-Bijoux Argile" },
@@ -26,11 +27,8 @@ export default function Hero() {
     return () => clearInterval(interval);
   }, [carouselImages.length]);
 
-  const scrollToProducts = () => {
-    const section = document.getElementById("products");
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth" });
-    }
+  const goToShop = () => {
+    navigate("/shop");
   };
 
   const goToSlide = (index) => setCurrentSlide(index);
@@ -54,7 +52,7 @@ export default function Hero() {
             Explorez un univers artistique où chaque création raconte une histoire unique et émouvante.
           </p>
           <div className="hero-buttons">
-            <button className="hero-cta-primary" onClick={scrollToProducts}>
+            <button className="hero-cta-primary" onClick={goToShop}>
               <span>Voir la collection complète</span>
               <span className="button-icon">✨</span>
             </button>
@@ -109,7 +107,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="scroll-arrow" onClick={scrollToProducts}>
+      <div className="scroll-arrow" onClick={goToShop}>
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="11" stroke="#364631" strokeWidth="1.5" strokeOpacity="0.6" />
           <path d="M12 6V18M12 18L7 13M12 18L17 13" stroke="#364631" strokeWidth="2" />
