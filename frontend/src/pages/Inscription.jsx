@@ -11,10 +11,49 @@ const Inscription = () => {
   const [mdp, setMdp] = useState("");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [emailError, setEmailError] = useState("");
+
+  const validateEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  // Fonction de validation du mot de passe
+  const validatePassword = (password) => {
+    const minLength = 12;
+    const hasLower = /[a-z]/.test(password);
+    const hasUpper = /[A-Z]/.test(password);
+    const hasDigit = /[0-9]/.test(password);
+    const hasSpecial = /[^A-Za-z0-9]/.test(password);
+    return (
+      password.length >= minLength &&
+      hasLower &&
+      hasUpper &&
+      hasDigit &&
+      hasSpecial
+    );
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateEmail(email)) {
+      setEmailError("Veuillez saisir une adresse email valide.");
+      return;
+    } else {
+      setEmailError("");
+    }
+
+    if (!validatePassword(mdp)) {
+      setPasswordError(
+        "Le mot de passe doit contenir au moins 12 caractères, avec des caractères spéciaux."
+      );
+      return;
+    } else {
+      setPasswordError("");
+    }
 
     try {
       const response = await axios.post(
@@ -90,6 +129,7 @@ const Inscription = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
+            <small style={{ color: "#b00020" }}>{emailError}</small>
           </label>
           <label>
             Nom d'utilisateur
@@ -118,6 +158,10 @@ const Inscription = () => {
                 {showPassword ? "👁️" : "👁️‍🗨️"}
               </span>
             </div>
+            <small style={{ color: "#b00020" }}>
+              {passwordError}
+            </small>
+            
           </label>
           <button type="submit">S'inscrire</button>
         </form>

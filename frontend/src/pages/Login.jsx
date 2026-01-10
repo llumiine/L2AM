@@ -6,12 +6,24 @@ import cakeImg from "../assets/fraise.png";
 
 const Login = () => {
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+    // Fonction de validation du format email
+    const validateEmail = (email) => {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    };
   const [mdp, setMdp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateEmail(email)) {
+      setEmailError("Veuillez saisir une adresse email valide.");
+      return;
+    } else {
+      setEmailError("");
+    }
 
     try {
       const response = await axios.post("http://localhost:9090/api/auth/login", {
@@ -20,12 +32,9 @@ const Login = () => {
       });
 
       const utilisateur = response.data.utilisateur;
-      
-      
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(utilisateur));
-      
-      
+
       if (utilisateur.role === 1) {
         console.log("Connexion admin réussie");
         navigate("/gestionadmin");
@@ -57,6 +66,7 @@ const Login = () => {
               required
               placeholder="Votre email"
             />
+            <small style={{ color: "#b00020" }}>{emailError}</small>
           </label>
           <label>
             Mot de passe
